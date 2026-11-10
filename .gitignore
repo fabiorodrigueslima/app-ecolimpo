@@ -24,3 +24,8 @@ build-verification
 *.njsproj
 *.sln
 *.sw?
+
+# Variáveis de ambiente (chaves)
+.env
+.env.*
+!.env.example

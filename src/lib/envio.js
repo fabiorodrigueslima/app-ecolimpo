@@ -1,10 +1,19 @@
-// Envio das respostas para a cooperativa.
-// ETAPA 1: ainda não existe banco de dados. A resposta é conferida, mas NÃO
-// sai do celular. Na Etapa 2 esta função passa a salvar no Supabase.
+// Envio das respostas (pesquisa e mensagens) para a cooperativa.
+// O endereço e a chave pública do Supabase vêm das variáveis de ambiente
+// (arquivo .env.local no computador; painel da Vercel quando publicar).
+// Sem essas variáveis, o app fica em "modo de teste": confere a resposta,
+// mas ela não sai do celular.
 
-export const ENVIO_LIGADO = false;
+import { criarInsercao } from "./supabase.js";
+
+const URL_SUPABASE = import.meta.env?.VITE_SUPABASE_URL ?? "";
+const CHAVE_PUBLICA = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY ?? "";
+
+export const ENVIO_LIGADO = Boolean(URL_SUPABASE && CHAVE_PUBLICA);
+
+const inserir = ENVIO_LIGADO ? criarInsercao({ url: URL_SUPABASE, chave: CHAVE_PUBLICA }) : null;
 
 export async function enviarResposta(resposta) {
-  void resposta;
-  return { ok: true, teste: true };
+  if (!inserir) return { ok: true, teste: true };
+  return inserir("respostas", resposta);
 }
