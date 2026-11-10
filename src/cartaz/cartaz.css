@@ -1,0 +1,75 @@
+/* Cartaz A4 para imprimir (usa as cores de src/styles/app.css) */
+.cartaz-pagina {
+  min-height: 100dvh; padding: 24px 16px 48px; background: #dfe7e2;
+  display: grid; gap: 24px; justify-items: center;
+}
+.cartaz-ferramentas {
+  width: 100%; max-width: 560px; display: grid; gap: 12px; padding: 20px;
+  border-radius: var(--radius); background: #fff; box-shadow: var(--shadow-sm);
+}
+.cartaz-ferramentas h1 { margin: 0; font-size: 1.4rem; }
+.cartaz-ferramentas .campo { padding: 0; border: 0; }
+.cartaz-ferramentas .link-pequeno { justify-self: start; }
+
+/* A folha: 210 x 297 mm. Na tela, diminui para caber. */
+.cartaz-folha {
+  --mm: min(1mm, calc((100vw - 32px) / 210));
+  width: calc(210 * var(--mm)); height: calc(297 * var(--mm));
+  padding: calc(14 * var(--mm)) calc(16 * var(--mm)) calc(10 * var(--mm));
+  display: flex; flex-direction: column; gap: calc(6 * var(--mm));
+  background: #fff; color: var(--text); box-shadow: var(--shadow); overflow: hidden;
+  font-size: calc(4.4 * var(--mm)); line-height: 1.35;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.cartaz-topo { display: flex; align-items: center; justify-content: space-between; }
+.cartaz-topo img { width: calc(62 * var(--mm)); height: auto; }
+.cartaz-selo {
+  padding: calc(1.6 * var(--mm)) calc(4 * var(--mm)); border-radius: 999px;
+  background: var(--brand-lime); color: var(--brand-blue-dark);
+  font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; font-size: calc(3.6 * var(--mm));
+}
+.cartaz-titulo {
+  margin: calc(2 * var(--mm)) 0 0; color: var(--brand-blue-dark);
+  font-size: calc(11.5 * var(--mm)); line-height: 1.08; letter-spacing: -0.02em;
+}
+
+.cartaz-coleta {
+  padding: calc(5 * var(--mm)) calc(7 * var(--mm)); border-radius: calc(5 * var(--mm));
+  background: var(--brand-green); color: #fff;
+}
+.cartaz-coleta p { margin: 0; }
+.cartaz-condominio { font-weight: 800; color: var(--brand-lime); text-transform: uppercase; letter-spacing: 0.06em; font-size: calc(3.8 * var(--mm)); }
+.cartaz-dia { font-size: calc(10 * var(--mm)); font-weight: 900; line-height: 1.1; margin-top: calc(1 * var(--mm)) !important; }
+.cartaz-dia::first-letter { text-transform: uppercase; }
+.cartaz-hora { font-size: calc(6.4 * var(--mm)); margin-top: calc(1 * var(--mm)) !important; }
+.cartaz-dica { margin-top: calc(2 * var(--mm)) !important; opacity: 0.92; }
+
+.cartaz-meio { flex: 1; display: grid; grid-template-columns: calc(82 * var(--mm)) 1fr; gap: calc(8 * var(--mm)); align-items: center; }
+.cartaz-qr-caixa { text-align: center; padding: calc(3 * var(--mm)); border: calc(1 * var(--mm)) solid var(--brand-blue); border-radius: calc(5 * var(--mm)); }
+.cartaz-qr { display: block; width: 100%; height: auto; }
+.cartaz-qr-instrucao { margin: calc(1 * var(--mm)) 0 0; font-weight: 900; color: var(--brand-blue-dark); font-size: calc(5 * var(--mm)); }
+.cartaz-endereco { margin: 0; color: var(--text-muted); font-size: calc(3.6 * var(--mm)); overflow-wrap: anywhere; }
+
+.cartaz-vantagens { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(5 * var(--mm)); }
+.cartaz-vantagens li { display: flex; align-items: center; gap: calc(3.5 * var(--mm)); font-weight: 700; font-size: calc(5.4 * var(--mm)); color: var(--brand-blue-dark); line-height: 1.2; }
+.cartaz-icone {
+  flex: none; width: calc(12 * var(--mm)); height: calc(12 * var(--mm)); display: grid; place-items: center;
+  border-radius: calc(3 * var(--mm)); background: #e2f1e6; color: var(--brand-green-dark);
+}
+.cartaz-icone svg { width: 62%; height: 62%; }
+
+.cartaz-gratis { margin: 0; padding: calc(3 * var(--mm)) calc(4 * var(--mm)); border-radius: calc(3 * var(--mm)); background: var(--surface-soft); font-weight: 700; text-align: center; }
+.cartaz-iphone { margin: 0; color: var(--text-muted); font-size: calc(3.7 * var(--mm)); text-align: center; }
+.cartaz-rodape {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: calc(1 * var(--mm)) calc(6 * var(--mm));
+  padding-top: calc(3 * var(--mm)); border-top: calc(0.4 * var(--mm)) solid var(--border);
+  color: var(--text-muted); font-size: calc(3.4 * var(--mm)); font-weight: 600;
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  body { background: #fff; }
+  .cartaz-pagina { padding: 0; background: #fff; display: block; min-height: 0; }
+  .cartaz-ferramentas { display: none; }
+  .cartaz-folha { --mm: 1mm; box-shadow: none; page-break-after: avoid; break-after: avoid; }
+}

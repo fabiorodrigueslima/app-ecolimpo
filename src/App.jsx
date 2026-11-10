@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { lerCondominioSalvo, salvarCondominio } from "./lib/armazenamento.js";
 import { atualizarCondominioDoLembrete } from "./lib/lembrete.js";
 import { CondominiosContexto, useCarregarCondominios } from "./lib/condominios.js";
+import { lerCondominioDoLink } from "./lib/link.js";
 import Layout from "./components/Layout.jsx";
 import EscolherCondominio from "./pages/EscolherCondominio.jsx";
 import Inicio from "./pages/Inicio.jsx";
@@ -14,8 +15,9 @@ import Mensagem from "./pages/Mensagem.jsx";
 import Privacidade from "./pages/Privacidade.jsx";
 import NaoEncontrada from "./pages/NaoEncontrada.jsx";
 
-// O painel só é baixado por quem abre /painel (os moradores não baixam).
+// O painel e o cartaz só são baixados por quem abre esses endereços (os moradores não baixam).
 const Painel = lazy(() => import("./painel/Painel.jsx"));
+const Cartaz = lazy(() => import("./cartaz/Cartaz.jsx"));
 
 function Aguarde({ texto = "Carregando…" }) {
   return (
@@ -26,7 +28,7 @@ function Aguarde({ texto = "Carregando…" }) {
 }
 
 export default function App() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const condominios = useCarregarCondominios();
   const [idSalvo, setIdSalvo] = useState(lerCondominioSalvo);
   const condominio = condominios.lista.find((c) => c.id === idSalvo) ?? null;
@@ -40,6 +42,16 @@ export default function App() {
       <Suspense fallback={<Aguarde />}>
         <Painel />
       </Suspense>
+    );
+  }
+
+  if (pathname === "/cartaz") {
+    return (
+      <CondominiosContexto.Provider value={condominios.lista}>
+        <Suspense fallback={<Aguarde />}>
+          <Cartaz />
+        </Suspense>
+      </CondominiosContexto.Provider>
     );
   }
 
@@ -72,7 +84,11 @@ export default function App() {
     // Primeira vez (ou condomínio saiu da lista): escolher antes de tudo.
     conteudo = (
       <Layout semMenu>
-        <EscolherCondominio aoEscolher={escolher} primeiraVez />
+        <EscolherCondominio
+          aoEscolher={escolher}
+          primeiraVez
+          sugerido={lerCondominioDoLink(search, condominios.lista.map((c) => c.id))}
+        />
       </Layout>
     );
   } else {
