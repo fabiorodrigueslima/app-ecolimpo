@@ -213,16 +213,23 @@ export default function Condominios({ api }) {
               </p>
               <p className="dica">Lembrete ligado: {inscritos[c.id] ?? 0} morador(es)</p>
             </div>
-            <button
-              type="button"
-              className="botao botao-secundario"
-              onClick={() => {
-                setAviso("");
-                setEditando(c);
-              }}
-            >
-              Editar
-            </button>
+            <div className="botoes">
+              {c.ativo && (
+                <a className="botao botao-secundario" href={`/cartaz?c=${encodeURIComponent(c.id)}`} target="_blank" rel="noreferrer">
+                  Cartaz
+                </a>
+              )}
+              <button
+                type="button"
+                className="botao botao-secundario"
+                onClick={() => {
+                  setAviso("");
+                  setEditando(c);
+                }}
+              >
+                Editar
+              </button>
+            </div>
           </li>
         ))}
       </ul>
