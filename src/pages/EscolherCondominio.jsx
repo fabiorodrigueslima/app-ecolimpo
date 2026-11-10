@@ -6,10 +6,12 @@ import { normalizar } from "../lib/busca.js";
 import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
 import { IconeBusca } from "../components/Icones.jsx";
 
-export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = false }) {
+export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = false, sugerido = null }) {
   const condominios = useCondominios();
   const [busca, setBusca] = useState("");
-  const [escolhido, setEscolhido] = useState(atual?.id ?? "");
+  // null = o morador ainda não tocou: usa o atual ou o que veio no QR Code do cartaz.
+  const [marcado, setEscolhido] = useState(null);
+  const escolhido = marcado ?? atual?.id ?? sugerido ?? "";
   const navegar = useNavigate();
 
   const lista = useMemo(() => {
@@ -34,7 +36,12 @@ export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = fa
         <div className="boas-vindas">
           <p className="sobretitulo">Bem-vindo(a)!</p>
           <h1>Qual é o seu condomínio?</h1>
-          <p>Escolha uma vez e o app mostra o dia da sua coleta seletiva. A escolha fica salva só neste celular.</p>
+          <p>
+            {sugerido
+              ? "Seu condomínio já está marcado. Confira e toque em Confirmar."
+              : "Escolha uma vez e o app mostra o dia da sua coleta seletiva."}{" "}
+            A escolha fica salva só neste celular.
+          </p>
         </div>
       ) : (
         <Cabecalho titulo="Trocar condomínio" voltar="/" />
