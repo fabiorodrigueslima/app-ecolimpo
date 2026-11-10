@@ -33,6 +33,7 @@ export default async function handler(req, res) {
 
   try {
     const resumo = await enviarLembretesDoDia({
+      condominios: await banco.buscarCondominios(),
       buscarInscricoes: banco.buscarInscricoes,
       apagarInscricao: banco.apagarInscricao,
       // TTL: se o celular estiver desligado, o aviso espera até 6 horas (depois perde o sentido).
@@ -42,6 +43,6 @@ export default async function handler(req, res) {
     return res.status(200).json(resumo);
   } catch (erro) {
     console.error("Lembrete da coleta falhou:", erro.message);
-    return res.status(502).json({ erro: "Falha ao ler as inscrições no banco." });
+    return res.status(502).json({ erro: "Falha ao ler o banco (condomínios ou inscrições)." });
   }
 }

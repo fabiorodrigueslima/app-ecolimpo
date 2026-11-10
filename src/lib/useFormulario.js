@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { condominios } from "../data/condominios.js";
+import { useCondominios } from "./condominios.js";
 import { enviarResposta } from "./envio.js";
-
-const idsCondominios = condominios.map((c) => c.id);
 
 // Cuida do estado, da conferência e do envio de um formulário.
 export function useFormulario(inicial, validar, montar) {
+  const idsCondominios = useCondominios().map((c) => c.id);
   const [dados, setDados] = useState(inicial);
   const [erros, setErros] = useState({});
   const [estado, setEstado] = useState("editando"); // editando | enviando | enviado | falhou

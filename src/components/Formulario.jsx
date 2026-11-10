@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { condominios } from "../data/condominios.js";
+import { useCondominios } from "../lib/condominios.js";
 import { ENVIO_LIGADO } from "../lib/envio.js";
 import { IconeCheck } from "./Icones.jsx";
 
 // Escolha do condomínio dentro dos formulários (já vem preenchido).
 export function CampoCondominio({ valor, mudar, erro }) {
+  const condominios = useCondominios();
   return (
     <label className="campo">
       <span>

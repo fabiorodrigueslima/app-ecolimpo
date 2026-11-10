@@ -43,7 +43,44 @@ export function criarCliente({ url, chave, buscar = globalThis.fetch, limiteMs =
   return {
     inserir: (tabela, dados) => postar(tabela, dados),
     funcao: (nome, argumentos) => postar(`rpc/${nome}`, argumentos),
+    ler: (caminho) => requisitar({ url, chave, buscar, limiteMs }, "GET", `rest/v1/${caminho}`),
   };
+}
+
+// Pedido genérico (usado para ler dados e pelo painel com login).
+// caminho: "rest/v1/..." ou "auth/v1/...". token: login da equipe (opcional).
+// Devolve { ok, status, dados }.
+export async function requisitar(
+  { url, chave, token, buscar = globalThis.fetch, limiteMs = 15000 },
+  metodo,
+  caminho,
+  { corpo, prefer } = {},
+) {
+  const headers = cabecalhos(chave);
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (prefer) headers.Prefer = prefer;
+  const controle = new AbortController();
+  const relogio = setTimeout(() => controle.abort(), limiteMs);
+  try {
+    const resposta = await buscar(`${url.replace(/\/+$/, "")}/${caminho}`, {
+      method: metodo,
+      headers,
+      body: corpo === undefined ? undefined : JSON.stringify(corpo),
+      signal: controle.signal,
+    });
+    const texto = typeof resposta.text === "function" ? await resposta.text() : "";
+    let dados = null;
+    try {
+      dados = texto ? JSON.parse(texto) : null;
+    } catch {
+      dados = texto;
+    }
+    return { ok: resposta.ok, status: resposta.status, dados };
+  } catch {
+    return { ok: false, status: 0, dados: null };
+  } finally {
+    clearTimeout(relogio);
+  }
 }
 
 // Mantido para quem só precisa inserir.

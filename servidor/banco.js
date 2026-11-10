@@ -29,5 +29,13 @@ export function criarBancoServidor({ url, chave, buscar = globalThis.fetch }) {
     if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao apagar inscrição`);
   }
 
-  return { buscarInscricoes, apagarInscricao };
+  // Condomínios ativos (cadastrados pelo painel).
+  async function buscarCondominios() {
+    const endereco = `${url.replace(/\/+$/, "")}/rest/v1/condominios?select=id,nome,dias,horario&ativo=is.true`;
+    const resposta = await buscar(endereco, { headers: cabecalhos(chave) });
+    if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao ler condomínios`);
+    return (await resposta.json()).map((c) => ({ ...c, dias: (c.dias ?? []).map(Number) }));
+  }
+
+  return { buscarInscricoes, apagarInscricao, buscarCondominios };
 }

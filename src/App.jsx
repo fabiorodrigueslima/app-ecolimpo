@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { condominios } from "./data/condominios.js";
 import { lerCondominioSalvo, salvarCondominio } from "./lib/armazenamento.js";
 import { atualizarCondominioDoLembrete } from "./lib/lembrete.js";
+import { CondominiosContexto, useCarregarCondominios } from "./lib/condominios.js";
 import Layout from "./components/Layout.jsx";
 import EscolherCondominio from "./pages/EscolherCondominio.jsx";
 import Inicio from "./pages/Inicio.jsx";
@@ -14,47 +14,84 @@ import Mensagem from "./pages/Mensagem.jsx";
 import Privacidade from "./pages/Privacidade.jsx";
 import NaoEncontrada from "./pages/NaoEncontrada.jsx";
 
-function encontrar(id) {
-  return condominios.find((c) => c.id === id) ?? null;
+// O painel só é baixado por quem abre /painel (os moradores não baixam).
+const Painel = lazy(() => import("./painel/Painel.jsx"));
+
+function Aguarde({ texto = "Carregando…" }) {
+  return (
+    <p className="carregando" role="status">
+      {texto}
+    </p>
+  );
 }
 
 export default function App() {
-  const [condominio, setCondominio] = useState(() => encontrar(lerCondominioSalvo()));
   const { pathname } = useLocation();
+  const condominios = useCarregarCondominios();
+  const [idSalvo, setIdSalvo] = useState(lerCondominioSalvo);
+  const condominio = condominios.lista.find((c) => c.id === idSalvo) ?? null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  if (pathname === "/painel" || pathname.startsWith("/painel/")) {
+    return (
+      <Suspense fallback={<Aguarde />}>
+        <Painel />
+      </Suspense>
+    );
+  }
+
   function escolher(id) {
     salvarCondominio(id);
-    setCondominio(encontrar(id));
+    setIdSalvo(id);
     atualizarCondominioDoLembrete(id);
   }
 
-  // Primeira vez: o morador escolhe o condomínio antes de tudo
-  // (a política de privacidade continua acessível).
-  if (!condominio && pathname !== "/privacidade") {
-    return (
+  let conteudo;
+  if (condominios.carregando && condominios.lista.length === 0) {
+    conteudo = (
+      <Layout semMenu>
+        <Aguarde />
+      </Layout>
+    );
+  } else if (condominios.erro) {
+    conteudo = (
+      <Layout semMenu>
+        <div className="pagina obrigado">
+          <h1>Sem conexão</h1>
+          <p>Não foi possível carregar a lista de condomínios. Confira a internet.</p>
+          <button type="button" className="botao botao-primario botao-largo" onClick={condominios.tentarDeNovo}>
+            Tentar de novo
+          </button>
+        </div>
+      </Layout>
+    );
+  } else if (!condominio && pathname !== "/privacidade") {
+    // Primeira vez (ou condomínio saiu da lista): escolher antes de tudo.
+    conteudo = (
       <Layout semMenu>
         <EscolherCondominio aoEscolher={escolher} primeiraVez />
       </Layout>
     );
+  } else {
+    conteudo = (
+      <Layout semMenu={!condominio}>
+        <Routes>
+          <Route path="/" element={<Inicio condominio={condominio} />} />
+          <Route path="/condominio" element={<EscolherCondominio atual={condominio} aoEscolher={escolher} />} />
+          <Route path="/coleta" element={<Coleta condominio={condominio} />} />
+          <Route path="/recicla" element={<Recicla />} />
+          <Route path="/fale" element={<Fale />} />
+          <Route path="/fale/pesquisa" element={<Pesquisa condominio={condominio} />} />
+          <Route path="/fale/mensagem" element={<Mensagem condominio={condominio} />} />
+          <Route path="/privacidade" element={<Privacidade />} />
+          <Route path="*" element={<NaoEncontrada />} />
+        </Routes>
+      </Layout>
+    );
   }
 
-  return (
-    <Layout semMenu={!condominio}>
-      <Routes>
-        <Route path="/" element={<Inicio condominio={condominio} />} />
-        <Route path="/condominio" element={<EscolherCondominio atual={condominio} aoEscolher={escolher} />} />
-        <Route path="/coleta" element={<Coleta condominio={condominio} />} />
-        <Route path="/recicla" element={<Recicla />} />
-        <Route path="/fale" element={<Fale />} />
-        <Route path="/fale/pesquisa" element={<Pesquisa condominio={condominio} />} />
-        <Route path="/fale/mensagem" element={<Mensagem condominio={condominio} />} />
-        <Route path="/privacidade" element={<Privacidade />} />
-        <Route path="*" element={<NaoEncontrada />} />
-      </Routes>
-    </Layout>
-  );
+  return <CondominiosContexto.Provider value={condominios.lista}>{conteudo}</CondominiosContexto.Provider>;
 }

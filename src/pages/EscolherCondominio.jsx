@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { condominios } from "../data/condominios.js";
+import { useCondominios } from "../lib/condominios.js";
 import { linkWhatsapp } from "../data/contatos.js";
 import { normalizar } from "../lib/busca.js";
 import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
 import { IconeBusca } from "../components/Icones.jsx";
 
 export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = false }) {
+  const condominios = useCondominios();
   const [busca, setBusca] = useState("");
   const [escolhido, setEscolhido] = useState(atual?.id ?? "");
   const navegar = useNavigate();
@@ -16,7 +17,7 @@ export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = fa
     return [...condominios]
       .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
       .filter((c) => !termo || normalizar(`${c.nome} ${c.regiao ?? ""}`).includes(termo));
-  }, [busca]);
+  }, [busca, condominios]);
 
   const temExemplo = condominios.some((c) => c.exemplo);
 
@@ -71,7 +72,11 @@ export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = fa
             </span>
           </label>
         ))}
-        {lista.length === 0 && <p className="vazio">Nenhum condomínio encontrado.</p>}
+        {lista.length === 0 && (
+          <p className="vazio">
+            {condominios.length === 0 ? "Nenhum condomínio cadastrado ainda." : "Nenhum condomínio encontrado."}
+          </p>
+        )}
       </fieldset>
 
       <div className="rodape-fixo">
