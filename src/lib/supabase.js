@@ -1,18 +1,19 @@
 // Conversa com o Supabase pela API REST (sem biblioteca extra).
-// A chave usada aqui é a chave PÚBLICA (publishable/anon): ela pode ficar no
-// app porque o banco só deixa ENVIAR respostas (regras RLS no arquivo
-// supabase/001_respostas.sql). Nunca use aqui a chave "secret"/"service_role".
+// No app, a chave usada é a PÚBLICA (publishable/anon): ela pode ficar no
+// app porque o banco só deixa enviar respostas e chamar as funções do
+// lembrete (regras nos arquivos supabase/*.sql).
+// A chave "secret"/"service_role" só é usada no servidor (pasta api/).
 
 export function cabecalhos(chave) {
   const h = { apikey: chave, "Content-Type": "application/json" };
-  // Chaves antigas (anon, formato JWT) também vão no Authorization.
-  if (!chave.startsWith("sb_publishable_")) h.Authorization = `Bearer ${chave}`;
+  // Chaves antigas (formato JWT) também vão no Authorization.
+  if (!/^sb_(publishable|secret)_/.test(chave)) h.Authorization = `Bearer ${chave}`;
   return h;
 }
 
-export function montarPedido(url, chave, tabela, dados) {
+export function montarPedido(url, chave, caminho, dados) {
   return {
-    endereco: `${url.replace(/\/+$/, "")}/rest/v1/${tabela}`,
+    endereco: `${url.replace(/\/+$/, "")}/rest/v1/${caminho}`,
     opcoes: {
       method: "POST",
       // "return=minimal": o banco não devolve a linha (o app não tem permissão de leitura).
@@ -22,10 +23,11 @@ export function montarPedido(url, chave, tabela, dados) {
   };
 }
 
-// Cria a função que grava uma linha. "buscar" é o fetch (trocado nos testes).
-export function criarInsercao({ url, chave, buscar = globalThis.fetch, limiteMs = 15000 }) {
-  return async function inserir(tabela, dados) {
-    const { endereco, opcoes } = montarPedido(url, chave, tabela, dados);
+// Cria o "cliente": inserir(tabela, dados) e funcao(nome, argumentos).
+// "buscar" é o fetch (trocado nos testes).
+export function criarCliente({ url, chave, buscar = globalThis.fetch, limiteMs = 15000 }) {
+  async function postar(caminho, dados) {
+    const { endereco, opcoes } = montarPedido(url, chave, caminho, dados);
     const controle = new AbortController();
     const relogio = setTimeout(() => controle.abort(), limiteMs);
     try {
@@ -36,5 +38,15 @@ export function criarInsercao({ url, chave, buscar = globalThis.fetch, limiteMs 
     } finally {
       clearTimeout(relogio);
     }
+  }
+
+  return {
+    inserir: (tabela, dados) => postar(tabela, dados),
+    funcao: (nome, argumentos) => postar(`rpc/${nome}`, argumentos),
   };
+}
+
+// Mantido para quem só precisa inserir.
+export function criarInsercao(opcoes) {
+  return criarCliente(opcoes).inserir;
 }

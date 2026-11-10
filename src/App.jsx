@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { condominios } from "./data/condominios.js";
 import { lerCondominioSalvo, salvarCondominio } from "./lib/armazenamento.js";
+import { atualizarCondominioDoLembrete } from "./lib/lembrete.js";
 import Layout from "./components/Layout.jsx";
 import EscolherCondominio from "./pages/EscolherCondominio.jsx";
 import Inicio from "./pages/Inicio.jsx";
@@ -28,6 +29,7 @@ export default function App() {
   function escolher(id) {
     salvarCondominio(id);
     setCondominio(encontrar(id));
+    atualizarCondominioDoLembrete(id);
   }
 
   // Primeira vez: o morador escolhe o condomínio antes de tudo

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { formatarHorario, proximasColetas, rotuloDaColeta, NOMES_DIAS } from "../lib/coleta.js";
 import ProximaColeta from "../components/ProximaColeta.jsx";
 import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
-import { IconeSino } from "../components/Icones.jsx";
+import Lembrete from "../components/Lembrete.jsx";
 
 export default function Coleta({ condominio }) {
   const proximas = proximasColetas(condominio, new Date(), 4);
@@ -45,15 +45,7 @@ export default function Coleta({ condominio }) {
         </section>
       )}
 
-      <section className="cartao cartao-suave" aria-labelledby="lembrete-titulo">
-        <h2 id="lembrete-titulo">
-          <IconeSino tamanho={20} /> Lembrete no celular
-        </h2>
-        <p>
-          Em breve: um aviso no seu celular às 6h30 do dia da coleta, para você não esquecer de colocar os recicláveis
-          para fora.
-        </p>
-      </section>
+      <Lembrete condominio={condominio} />
 
       <p className="nota-centro">
         Mudou de condomínio? <Link to="/condominio">Trocar condomínio</Link>

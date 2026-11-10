@@ -271,6 +271,14 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .botao-whatsapp { background: var(--brand-green); color: #fff; }
 .botao-whatsapp:hover { background: var(--brand-green-dark); }
 .contatos { margin-top: 12px !important; line-height: 2; }
+.botao-secundario { background: #fff; color: var(--brand-blue); border-color: var(--brand-blue); }
+
+/* ===== Lembrete ===== */
+.cartao-lembrete { display: grid; gap: 12px; }
+.cartao-lembrete h2 { margin: 0; }
+.cartao-lembrete h2 svg { color: var(--brand-green); }
+.lembrete-ligado { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: #e2f1e6; color: var(--success); font-weight: 700; }
+.lembrete-ligado svg { flex: none; margin-top: 2px; }
 
 /* ===== Obrigado ===== */
 .obrigado { text-align: center; justify-items: center; padding-top: 32px; }
