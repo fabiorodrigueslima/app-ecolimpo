@@ -1,0 +1,47 @@
+// Função da Vercel: https://app.cooperaecolimpo.com.br/api/lembrete
+// Chamada todo dia às 6h30 (Brasília) pelo "despertador" do Supabase
+// (supabase/003_agendamento.sql). Envia o lembrete da coleta do dia.
+//
+// Variáveis de ambiente (configurar no painel da Vercel, NUNCA no código):
+//   VITE_SUPABASE_URL       endereço do Supabase (o mesmo do app)
+//   SUPABASE_SECRET_KEY     chave SECRETA do Supabase (sb_secret_...)
+//   VITE_VAPID_PUBLIC_KEY   chave pública do lembrete (a mesma do app)
+//   VAPID_PRIVATE_KEY       chave privada do lembrete
+//   LEMBRETE_SEGREDO        senha que o despertador manda para poder chamar
+
+import webpush from "web-push";
+import { contatos } from "../src/data/contatos.js";
+import { criarBancoServidor } from "../servidor/banco.js";
+import { enviarLembretesDoDia, pedidoAutorizado } from "../servidor/lembrete.js";
+
+const NECESSARIAS = ["VITE_SUPABASE_URL", "SUPABASE_SECRET_KEY", "VITE_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "LEMBRETE_SEGREDO"];
+
+export default async function handler(req, res) {
+  if (req.method !== "POST" && req.method !== "GET") {
+    return res.status(405).json({ erro: "Use POST." });
+  }
+  if (!pedidoAutorizado(req.headers.authorization, process.env.LEMBRETE_SEGREDO)) {
+    return res.status(401).json({ erro: "Não autorizado." });
+  }
+  const faltando = NECESSARIAS.filter((nome) => !process.env[nome]);
+  if (faltando.length) {
+    return res.status(500).json({ erro: "Faltam variáveis de ambiente.", faltando });
+  }
+
+  webpush.setVapidDetails(`mailto:${contatos.email}`, process.env.VITE_VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
+  const banco = criarBancoServidor({ url: process.env.VITE_SUPABASE_URL, chave: process.env.SUPABASE_SECRET_KEY });
+
+  try {
+    const resumo = await enviarLembretesDoDia({
+      buscarInscricoes: banco.buscarInscricoes,
+      apagarInscricao: banco.apagarInscricao,
+      // TTL: se o celular estiver desligado, o aviso espera até 6 horas (depois perde o sentido).
+      enviarPush: (inscricao, corpo) => webpush.sendNotification(inscricao, corpo, { TTL: 6 * 3600, urgency: "high" }),
+    });
+    console.log("Lembrete da coleta:", JSON.stringify(resumo));
+    return res.status(200).json(resumo);
+  } catch (erro) {
+    console.error("Lembrete da coleta falhou:", erro.message);
+    return res.status(502).json({ erro: "Falha ao ler as inscrições no banco." });
+  }
+}

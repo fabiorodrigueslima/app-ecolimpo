@@ -18,4 +18,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Código que roda no servidor ou no terminal (Node.js).
+    files: ['api/**/*.js', 'servidor/**/*.js', 'scripts/**/*.mjs', 'tests/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
 ])

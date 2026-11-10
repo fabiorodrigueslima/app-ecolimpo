@@ -1,7 +1,7 @@
 {
   "outputDirectory": "build",
   "rewrites": [
-    { "source": "/((?!assets/|sw\\.js|manifest\\.webmanifest|.*\\.png).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|assets/|sw\\.js|manifest\\.webmanifest|.*\\.png).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
