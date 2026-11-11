@@ -1,8 +1,84 @@
 import { useEffect, useMemo, useState } from "react";
 import { TEMAS_PESQUISA, TIPOS_MENSAGEM } from "../lib/formularios.js";
-import { ROTULO_TIPO, formatarDataHora, paraCsv, resumoNotas } from "./regras.js";
+import { ROTULO_TIPO, formatarDataHora, paraCsv, resumoNotas, rotuloMotivo, rotuloHabito } from "./regras.js";
+import { HABITOS } from "../data/pesquisa.js";
 
 const POR_PAGINA = 50;
+
+const pct = (v) => (v === null ? "—" : `${v}%`);
+
+// Quadro de resultados da pesquisa (conforme os filtros escolhidos).
+function ResumoPesquisa({ resumo }) {
+  const { temas, nps, motivos, habito } = resumo;
+  return (
+    <div className="resumo-pesquisa" aria-label="Resultados da pesquisa">
+      <div className="resumo">
+        <div className="resumo-item">
+          <strong>{resumo.total}</strong>
+          <span>respostas no período</span>
+          <small>{resumo.pesquisas} pesquisas de satisfação</small>
+        </div>
+        {TEMAS_PESQUISA.map((t) => (
+          <div key={t.id} className="resumo-item">
+            <strong>{pct(temas[t.id].satisfeitos)}</strong>
+            <span>satisfeitos com {t.rotulo.toLowerCase()}</span>
+            <small>
+              {temas[t.id].respostas} respostas
+              {resumo.medias[t.id] !== null && ` · média ${resumo.medias[t.id].toLocaleString("pt-BR")} de 5`}
+            </small>
+          </div>
+        ))}
+        <div className="resumo-item resumo-nps">
+          <strong>{nps.valor === null ? "—" : nps.valor > 0 ? `+${nps.valor}` : nps.valor}</strong>
+          <span>NPS (recomendação)</span>
+          <small>
+            {nps.respostas
+              ? `${pct(nps.promotores)} recomendam · ${pct(nps.detratores)} não recomendam`
+              : "sem respostas"}
+          </small>
+        </div>
+      </div>
+
+      {(habito.respostas > 0 || motivos.length > 0) && (
+        <div className="resumo-detalhes">
+          {habito.respostas > 0 && (
+            <div className="resumo-bloco">
+              <h2>Separa os recicláveis em casa?</h2>
+              <ul className="barras">
+                {HABITOS.map((h) => (
+                  <li key={h.id} className="barra">
+                    <span className="barra-nome">{h.rotulo}</span>
+                    <span className="barra-trilho" aria-hidden="true">
+                      <span className="barra-valor" style={{ width: `${habito[h.id] ?? 0}%` }} />
+                    </span>
+                    <span className="barra-numero">{pct(habito[h.id])}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {motivos.length > 0 && (
+            <div className="resumo-bloco">
+              <h2>Motivos das notas baixas</h2>
+              <ol className="ranking">
+                {motivos.slice(0, 6).map((m) => (
+                  <li key={m.codigo}>
+                    <span>{m.rotulo}</span>
+                    <strong>{m.total}</strong>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
+      )}
+      <p className="dica">
+        Satisfeitos = notas 4 e 5 (“Não sei” não entra na conta). NPS vai de −100 a +100: % que dá 9 ou 10 menos % que
+        dá 0 a 6.
+      </p>
+    </div>
+  );
+}
 const MAXIMO_PLANILHA = 10000;
 const FILTROS_INICIAIS = { tipo: "todas", condominio: "", periodo: "30", soNaoLidas: false };
 
@@ -33,7 +109,7 @@ export default function Respostas({ api }) {
       api.listarRespostas(filtros, { limite: POR_PAGINA }),
       api.listarRespostas(filtros, {
         limite: MAXIMO_PLANILHA,
-        campos: "tipo,nota_coleta,nota_mobilizacao,nota_atendimento",
+        campos: "tipo,nota_coleta,nota_mobilizacao,nota_atendimento,nps,habito,motivos",
       }),
     ]).then(([pagina, todas]) => {
       if (!ativo) return;
@@ -147,20 +223,7 @@ export default function Respostas({ api }) {
         </p>
       )}
 
-      {estado === "pronto" && resumo && (
-        <div className="resumo" aria-label="Resumo">
-          <div className="resumo-item">
-            <strong>{resumo.total}</strong>
-            <span>respostas</span>
-          </div>
-          {TEMAS_PESQUISA.map((t) => (
-            <div key={t.id} className="resumo-item">
-              <strong>{resumo.medias[t.id] === null ? "—" : resumo.medias[t.id].toLocaleString("pt-BR")}</strong>
-              <span>média {t.rotulo.toLowerCase()}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {estado === "pronto" && resumo && <ResumoPesquisa resumo={resumo} />}
 
       {aviso && (
         <p className="aviso-ok" role="status">
@@ -187,13 +250,38 @@ export default function Respostas({ api }) {
                 </div>
                 <p className="resposta-condominio">{nomes[r.condominio_id] ?? r.condominio_id}</p>
                 {r.tipo === "pesquisa" && (
-                  <ul className="resposta-notas">
-                    {TEMAS_PESQUISA.map((t) => (
-                      <li key={t.id}>
-                        {t.rotulo}: <strong>{r[`nota_${t.id}`]}</strong>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="resposta-notas">
+                      {TEMAS_PESQUISA.map((t) => (
+                        <li key={t.id}>
+                          {t.rotulo}: <strong>{r[`nota_${t.id}`] ?? "não sei"}</strong>
+                        </li>
+                      ))}
+                      {r.nps != null && (
+                        <li>
+                          Recomendação: <strong>{r.nps}/10</strong>
+                        </li>
+                      )}
+                      {r.habito && (
+                        <li>
+                          Separa em casa: <strong>{rotuloHabito(r.habito)}</strong>
+                        </li>
+                      )}
+                    </ul>
+                    {r.motivos?.length > 0 && (
+                      <ul className="resposta-motivos">
+                        {r.motivos.map((m) => (
+                          <li key={m}>{rotuloMotivo(m)}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {r.detalhes &&
+                      Object.entries(r.detalhes).map(([tema, texto]) => (
+                        <p key={tema} className="resposta-texto">
+                          <strong>O que aconteceu ({TEMAS_PESQUISA.find((t) => t.id === tema)?.rotulo ?? tema}):</strong> {texto}
+                        </p>
+                      ))}
+                  </>
                 )}
                 {r.texto && <p className="resposta-texto">{r.texto}</p>}
                 {(r.nome || r.apartamento) && (

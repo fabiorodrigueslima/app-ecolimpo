@@ -3,6 +3,7 @@
 import { normalizar } from "../lib/busca.js";
 import { HORARIOS_VALIDOS } from "../lib/coleta.js";
 import { TIPOS_MENSAGEM, TEMAS_PESQUISA } from "../lib/formularios.js";
+import { HABITOS } from "../data/pesquisa.js";
 
 export const ROTULO_TIPO = {
   pesquisa: "Pesquisa",
@@ -78,15 +79,59 @@ export function montarFiltroRespostas(filtros, agora = new Date()) {
   return partes;
 }
 
-// Média das notas das pesquisas (1 casa decimal).
+const umaCasa = (n) => Math.round(n * 10) / 10;
+const porcento = (parte, total) => (total ? Math.round((parte / total) * 100) : null);
+
+// "coleta:nao_passou" -> "Coleta seletiva: Não passou no dia"
+export function rotuloMotivo(codigo) {
+  const [idTema, idMotivo] = String(codigo).split(":");
+  const tema = TEMAS_PESQUISA.find((t) => t.id === idTema);
+  const motivo = tema?.motivos.find((m) => m.id === idMotivo);
+  return tema && motivo ? `${tema.rotulo}: ${motivo.rotulo}` : codigo;
+}
+
+export const rotuloHabito = (id) => HABITOS.find((h) => h.id === id)?.rotulo ?? "";
+
+// Resumo das pesquisas (padrão de mercado):
+//   * satisfeitos = % de notas 4 ou 5 entre quem respondeu o tema ("Não sei" fica de fora)
+//   * NPS = % que dá 9–10 menos % que dá 0–6 (vai de -100 a +100)
 export function resumoNotas(respostas) {
   const pesquisas = respostas.filter((r) => r.tipo === "pesquisa");
   const medias = {};
+  const temas = {};
   for (const tema of TEMAS_PESQUISA) {
     const notas = pesquisas.map((r) => r[`nota_${tema.id}`]).filter((n) => Number.isFinite(n));
-    medias[tema.id] = notas.length ? Math.round((notas.reduce((a, b) => a + b, 0) / notas.length) * 10) / 10 : null;
+    medias[tema.id] = notas.length ? umaCasa(notas.reduce((a, b) => a + b, 0) / notas.length) : null;
+    temas[tema.id] = {
+      respostas: notas.length,
+      satisfeitos: porcento(notas.filter((n) => n >= 4).length, notas.length),
+    };
   }
-  return { total: respostas.length, pesquisas: pesquisas.length, medias };
+
+  const notasNps = pesquisas.map((r) => r.nps).filter((n) => Number.isFinite(n));
+  const promotores = notasNps.filter((n) => n >= 9).length;
+  const detratores = notasNps.filter((n) => n <= 6).length;
+  const nps = {
+    respostas: notasNps.length,
+    valor: notasNps.length ? Math.round(((promotores - detratores) / notasNps.length) * 100) : null,
+    promotores: porcento(promotores, notasNps.length),
+    neutros: porcento(notasNps.length - promotores - detratores, notasNps.length),
+    detratores: porcento(detratores, notasNps.length),
+  };
+
+  const contagem = new Map();
+  for (const r of pesquisas) for (const m of r.motivos ?? []) contagem.set(m, (contagem.get(m) ?? 0) + 1);
+  const motivos = [...contagem.entries()]
+    .map(([codigo, total]) => ({ codigo, rotulo: rotuloMotivo(codigo), total }))
+    .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo, "pt-BR"));
+
+  const comHabito = pesquisas.filter((r) => HABITOS.some((h) => h.id === r.habito));
+  const habito = {
+    respostas: comHabito.length,
+    ...Object.fromEntries(HABITOS.map((h) => [h.id, porcento(comHabito.filter((r) => r.habito === h.id).length, comHabito.length)])),
+  };
+
+  return { total: respostas.length, pesquisas: pesquisas.length, medias, temas, nps, motivos, habito };
 }
 
 export function formatarDataHora(iso) {
@@ -109,6 +154,10 @@ export function paraCsv(respostas, nomes = {}) {
     ["Nota coleta", (r) => r.nota_coleta ?? ""],
     ["Nota mobilização", (r) => r.nota_mobilizacao ?? ""],
     ["Nota atendimento", (r) => r.nota_atendimento ?? ""],
+    ["Recomendação (0-10)", (r) => r.nps ?? ""],
+    ["Separa em casa", (r) => rotuloHabito(r.habito)],
+    ["Motivos (nota baixa)", (r) => (r.motivos ?? []).map(rotuloMotivo).join(" | ")],
+    ["O que aconteceu", (r) => Object.values(r.detalhes ?? {}).join(" | ")],
     ["Texto", (r) => r.texto ?? ""],
     ["Nome", (r) => r.nome ?? ""],
     ["Apartamento", (r) => r.apartamento ?? ""],

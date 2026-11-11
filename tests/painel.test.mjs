@@ -9,6 +9,7 @@ import {
   validarNovaSenha,
   montarFiltroRespostas,
   resumoNotas,
+  rotuloMotivo,
   paraCsv,
   gerarId,
   validarCondominio,
@@ -65,14 +66,43 @@ test("filtros das respostas viram a consulta certa", () => {
   assert.deepEqual(montarFiltroRespostas({ tipo: "mensagens" }, agora), ["tipo=neq.pesquisa"]);
 });
 
-test("médias das notas", () => {
+test("resumo da pesquisa: satisfeitos, médias, NPS, motivos e hábito", () => {
   const r = resumoNotas([
-    { tipo: "pesquisa", nota_coleta: 5, nota_mobilizacao: 4, nota_atendimento: 3 },
-    { tipo: "pesquisa", nota_coleta: 4, nota_mobilizacao: 4, nota_atendimento: 4 },
+    { tipo: "pesquisa", nota_coleta: 5, nota_mobilizacao: 4, nota_atendimento: null, nps: 10, habito: "sempre" },
+    { tipo: "pesquisa", nota_coleta: 4, nota_mobilizacao: 2, nota_atendimento: 3, nps: 8, habito: "sempre", motivos: ["mobilizacao:nao_claras"] },
+    {
+      tipo: "pesquisa",
+      nota_coleta: 1,
+      nota_mobilizacao: null,
+      nota_atendimento: 5,
+      nps: 3,
+      habito: "as_vezes",
+      motivos: ["coleta:nao_passou", "mobilizacao:nao_claras"],
+    },
+    { tipo: "pesquisa", nota_coleta: 5, nota_mobilizacao: 5, nota_atendimento: null, nps: 9, habito: "ainda_nao" },
     { tipo: "elogio", texto: "Muito bom" },
   ]);
-  assert.deepEqual(r, { total: 3, pesquisas: 2, medias: { coleta: 4.5, mobilizacao: 4, atendimento: 3.5 } });
-  assert.deepEqual(resumoNotas([]).medias, { coleta: null, mobilizacao: null, atendimento: null });
+  assert.equal(r.total, 5);
+  assert.equal(r.pesquisas, 4);
+  assert.deepEqual(r.medias, { coleta: 3.8, mobilizacao: 3.7, atendimento: 4 });
+  // Coleta: 3 de 4 deram 4 ou 5. Atendimento: só 2 responderam ("Não sei" fica de fora).
+  assert.deepEqual(r.temas.coleta, { respostas: 4, satisfeitos: 75 });
+  assert.deepEqual(r.temas.atendimento, { respostas: 2, satisfeitos: 50 });
+  // NPS: 2 promotores (10 e 9), 1 neutro (8), 1 detrator (3) -> 50% - 25% = +25
+  assert.deepEqual(r.nps, { respostas: 4, valor: 25, promotores: 50, neutros: 25, detratores: 25 });
+  assert.deepEqual(
+    r.motivos.map((m) => [m.rotulo, m.total]),
+    [
+      ["Mobilização e orientação: As orientações não são claras", 2],
+      ["Coleta seletiva: Não passou no dia", 1],
+    ],
+  );
+  assert.deepEqual(r.habito, { respostas: 4, sempre: 50, as_vezes: 25, ainda_nao: 25 });
+
+  const vazio = resumoNotas([]);
+  assert.deepEqual(vazio.medias, { coleta: null, mobilizacao: null, atendimento: null });
+  assert.equal(vazio.nps.valor, null);
+  assert.equal(rotuloMotivo("coisa:estranha"), "coisa:estranha");
 });
 
 test("planilha CSV abre no Excel e não executa fórmulas", () => {
