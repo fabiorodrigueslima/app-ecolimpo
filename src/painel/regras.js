@@ -254,3 +254,30 @@ export function diasDesdeCopia(isoUltima, agora = new Date()) {
   if (!isoUltima) return null;
   return Math.floor((agora.getTime() - new Date(isoUltima).getTime()) / 86400000);
 }
+
+// ---------- Verificação em 2 etapas (código do app autenticador) ----------
+
+// Nível do login, guardado dentro do token: "aal1" = só senha; "aal2" = senha + código.
+export function lerAal(token) {
+  try {
+    const parte = String(token).split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(atob(parte + "=".repeat((4 - (parte.length % 4)) % 4)));
+    return json.aal ?? "aal1";
+  } catch {
+    return "aal1";
+  }
+}
+
+// O que a pessoa precisa fazer agora:
+//   "pronto"    -> já entrou com as 2 etapas
+//   "codigo"    -> já cadastrou o autenticador: digitar o código de 6 números
+//   "cadastrar" -> primeira vez: ler o QR Code com o app autenticador
+export function etapaDoMfa(fatores, aal) {
+  if (aal === "aal2") return "pronto";
+  const verificado = (fatores ?? []).find((f) => f.factor_type === "totp" && f.status === "verified");
+  return verificado ? "codigo" : "cadastrar";
+}
+
+export function codigoValido(codigo) {
+  return /^\d{6}$/.test(String(codigo).trim());
+}

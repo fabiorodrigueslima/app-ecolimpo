@@ -39,6 +39,37 @@ export async function definirSenha(token, senha) {
   return r.ok ? { ok: true } : { ok: false, erro: mensagemDeErroDoLogin(r.status, r.dados) };
 }
 
+// ---------- Verificação em 2 etapas (Supabase MFA, tipo TOTP) ----------
+
+// Lista os autenticadores cadastrados da pessoa logada.
+export async function lerFatores(token) {
+  const r = await requisitar(base(token), "GET", "auth/v1/user");
+  return r.ok ? { ok: true, fatores: r.dados?.factors ?? [] } : { ok: false, fatores: [] };
+}
+
+// Primeira vez: cria o autenticador e devolve o QR Code e a chave para digitar.
+export async function cadastrarAutenticador(token) {
+  const r = await requisitar(base(token), "POST", "auth/v1/factors", {
+    corpo: { factor_type: "totp", issuer: "Ecolimpo Painel" },
+  });
+  if (!r.ok) return { ok: false };
+  return { ok: true, id: r.dados.id, qr: r.dados.totp?.qr_code, chave: r.dados.totp?.secret };
+}
+
+// Confere o código de 6 números. Se estiver certo, devolve um login novo (com as 2 etapas).
+export async function confirmarCodigo(token, fatorId, codigo) {
+  const desafio = await requisitar(base(token), "POST", `auth/v1/factors/${encodeURIComponent(fatorId)}/challenge`, {
+    corpo: {},
+  });
+  if (!desafio.ok) return { ok: false, erro: "Não foi possível conferir agora. Tente de novo." };
+  const r = await requisitar(base(token), "POST", `auth/v1/factors/${encodeURIComponent(fatorId)}/verify`, {
+    corpo: { challenge_id: desafio.dados.id, code: String(codigo).trim() },
+  });
+  if (r.ok) return { ok: true, sessao: sessaoDaResposta(r.dados) };
+  if (r.status === 429) return { ok: false, erro: "Muitas tentativas. Espere alguns minutos." };
+  return { ok: false, erro: "Código incorreto ou vencido. Confira o app autenticador e digite o código atual." };
+}
+
 export async function lerEmail(token) {
   const r = await requisitar(base(token), "GET", "auth/v1/user");
   return r.ok ? r.dados?.email ?? "" : "";

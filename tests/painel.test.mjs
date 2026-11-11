@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import {
   sessaoDaResposta,
@@ -10,6 +11,9 @@ import {
   montarFiltroRespostas,
   resumoNotas,
   rotuloMotivo,
+  lerAal,
+  etapaDoMfa,
+  codigoValido,
   paraCsv,
   gerarId,
   validarCondominio,
@@ -198,4 +202,37 @@ test("pedido do painel leva o login (token) e lê a resposta", async () => {
   assert.equal(pedido.o.headers.apikey, "sb_publishable_t");
   assert.equal(pedido.o.method, "PATCH");
   assert.equal(pedido.o.body, '{"lida":true}');
+});
+
+// ---------- Verificação em 2 etapas ----------
+
+const tokenFalso = (conteudo) =>
+  `cabecalho.${Buffer.from(JSON.stringify(conteudo)).toString("base64url")}.assinatura`;
+
+test("2 etapas: lê o nível do login dentro do token", () => {
+  assert.equal(lerAal(tokenFalso({ aal: "aal2", email: "x@y.com" })), "aal2");
+  assert.equal(lerAal(tokenFalso({ aal: "aal1" })), "aal1");
+  assert.equal(lerAal(tokenFalso({})), "aal1");
+  assert.equal(lerAal("lixo"), "aal1"); // token estranho conta como só senha
+});
+
+test("2 etapas: decide entre cadastrar, pedir código ou entrar", () => {
+  const verificado = { id: "f1", factor_type: "totp", status: "verified" };
+  const naoTerminado = { id: "f2", factor_type: "totp", status: "unverified" };
+  assert.equal(etapaDoMfa([], "aal1"), "cadastrar");
+  assert.equal(etapaDoMfa([naoTerminado], "aal1"), "cadastrar"); // cadastro abandonado: começa de novo
+  assert.equal(etapaDoMfa([verificado], "aal1"), "codigo");
+  assert.equal(etapaDoMfa([verificado], "aal2"), "pronto");
+});
+
+test("2 etapas: código precisa ter exatamente 6 números", () => {
+  assert.equal(codigoValido("123456"), true);
+  assert.equal(codigoValido(" 123456 "), true);
+  assert.equal(codigoValido("12345"), false);
+  assert.equal(codigoValido("12345a"), false);
+});
+
+test("2 etapas: o banco (SQL 012) exige aal2 para a equipe", () => {
+  const sql = readFileSync(new URL("../supabase/012_painel_duas_etapas.sql", import.meta.url), "utf8");
+  assert.match(sql, /auth\.jwt\(\) ->> 'aal', 'aal1'\) = 'aal2'/);
 });
