@@ -208,3 +208,49 @@ export function linhaDoCondominio(dados) {
     ativo: Boolean(dados.ativo),
   };
 }
+
+// ---------- Lembrete das 6h30 (registro do despertador) ----------
+
+// Situação mostrada no painel a partir do último registro (tabela envios_lembrete).
+// "ok": rodou nas últimas 26 horas sem erro. "atencao": atrasou ou deu erro. "nunca": ainda não rodou.
+export function situacaoLembrete(ultimo, agora = new Date()) {
+  if (!ultimo) return { nivel: "nunca", titulo: "O lembrete ainda não foi enviado nenhuma vez", detalhe: "Ele começa a funcionar depois que o app for publicado." };
+  const quando = formatarDataHora(ultimo.executado_em);
+  const horas = (agora.getTime() - new Date(ultimo.executado_em).getTime()) / 3600000;
+  if (ultimo.erro) {
+    return { nivel: "atencao", titulo: `O último lembrete deu erro (${quando})`, detalhe: "Os moradores podem não ter recebido o aviso. Avise quem cuida do app." };
+  }
+  if (horas > 26) {
+    return { nivel: "atencao", titulo: `O lembrete não roda desde ${quando}`, detalhe: "O despertador das 6h30 pode estar parado. Avise quem cuida do app." };
+  }
+  const n = ultimo.condominios?.length ?? 0;
+  const detalhe =
+    n === 0
+      ? "Hoje nenhum condomínio tinha coleta, então nenhum aviso foi enviado."
+      : `${n} condomínio(s) com coleta · ${ultimo.enviados} aviso(s) enviado(s)` +
+        (ultimo.falhas ? ` · ${ultimo.falhas} falha(s)` : "") +
+        (ultimo.removidos ? ` · ${ultimo.removidos} celular(es) que desligaram o aviso` : "");
+  return { nivel: ultimo.falhas ? "atencao" : "ok", titulo: `Último lembrete: ${quando}`, detalhe };
+}
+
+// ---------- Cópia de segurança ----------
+
+export const DIAS_PARA_NOVA_COPIA = 30;
+
+export function montarBackup({ respostas, condominios, geradoEm = new Date() }) {
+  return {
+    app: "Ecolimpo — Coleta Seletiva",
+    tipo: "copia-de-seguranca",
+    versao: 1,
+    gerado_em: geradoEm.toISOString(),
+    totais: { respostas: respostas.length, condominios: condominios.length },
+    condominios,
+    respostas,
+  };
+}
+
+// Quantos dias desde a última cópia (null = nunca baixou neste computador).
+export function diasDesdeCopia(isoUltima, agora = new Date()) {
+  if (!isoUltima) return null;
+  return Math.floor((agora.getTime() - new Date(isoUltima).getTime()) / 86400000);
+}

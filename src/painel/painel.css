@@ -62,6 +62,12 @@
 .ranking li strong { float: right; color: var(--error); }
 .resposta-motivos { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 10px 0 0; padding: 0; }
 .resposta-motivos li { padding: 3px 10px; border-radius: 999px; background: #fbe9df; color: #9a3f10; font-size: 0.82rem; font-weight: 700; }
+.situacao { display: grid; gap: 2px; padding: 12px 16px; border-radius: var(--radius); border: 1px solid; }
+.situacao span { font-size: 0.9rem; }
+.situacao-ok { background: #e2f1e6; border-color: #b7dcc2; color: var(--success); }
+.situacao-atencao { background: #fff8e1; border-color: #e8c55a; color: #5c4300; }
+.situacao-nunca { background: var(--surface-soft); border-color: var(--border); color: var(--text-muted); }
+.painel-abas { flex-wrap: wrap; }
 .acoes-lista { display: flex; justify-content: flex-end; }
 .respostas, .condominios { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .resposta { padding: 16px; border: 1px solid var(--border); border-left: 5px solid var(--brand-green); border-radius: var(--radius); background: #fff; }

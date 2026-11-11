@@ -98,5 +98,20 @@ export function criarApiPainel(obterToken) {
     contarInscricoes() {
       return pedir("POST", "rpc/contar_inscricoes", { corpo: {} });
     },
+
+    ultimoEnvioLembrete() {
+      return pedir("GET", "envios_lembrete?select=*&order=executado_em.desc&limit=1");
+    },
+
+    // Todas as respostas, de 1000 em 1000 (para a cópia de segurança).
+    async todasAsRespostas() {
+      const lista = [];
+      for (let pagina = 0; ; pagina++) {
+        const r = await pedir("GET", `respostas?select=*&order=criado_em.asc&limit=1000&offset=${pagina * 1000}`);
+        if (!r.ok) return r;
+        lista.push(...r.dados);
+        if (r.dados.length < 1000) return { ok: true, dados: lista };
+      }
+    },
   };
 }

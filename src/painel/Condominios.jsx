@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NOMES_DIAS, descreverDias, formatarHorario } from "../lib/coleta.js";
-import { gerarId, validarCondominio } from "./regras.js";
+import { gerarId, validarCondominio, situacaoLembrete } from "./regras.js";
 
 const VAZIO = { nome: "", regiao: "", dias: [], horario: "", piloto: false, ativo: true };
 
@@ -109,6 +109,7 @@ function Formulario({ inicial, novo, aoSalvar, aoCancelar }) {
 export default function Condominios({ api }) {
   const [lista, setLista] = useState([]);
   const [inscritos, setInscritos] = useState({});
+  const [lembrete, setLembrete] = useState(null);
   const [estado, setEstado] = useState("carregando");
   const [editando, setEditando] = useState(null); // null | "novo" | condomínio
   const [aviso, setAviso] = useState("");
@@ -116,13 +117,16 @@ export default function Condominios({ api }) {
 
   useEffect(() => {
     let ativo = true;
-    Promise.all([api.listarCondominios(), api.contarInscricoes()]).then(([conds, contagem]) => {
-      if (!ativo) return;
-      if (!conds.ok) return setEstado("erro");
-      setLista(conds.dados);
-      if (contagem.ok) setInscritos(Object.fromEntries(contagem.dados.map((c) => [c.condominio_id, Number(c.total)])));
-      setEstado("pronto");
-    });
+    Promise.all([api.listarCondominios(), api.contarInscricoes(), api.ultimoEnvioLembrete()]).then(
+      ([conds, contagem, envio]) => {
+        if (!ativo) return;
+        if (!conds.ok) return setEstado("erro");
+        setLista(conds.dados);
+        if (contagem.ok) setInscritos(Object.fromEntries(contagem.dados.map((c) => [c.condominio_id, Number(c.total)])));
+        setLembrete(envio.ok ? situacaoLembrete(envio.dados[0] ?? null) : null);
+        setEstado("pronto");
+      },
+    );
     return () => {
       ativo = false;
     };
@@ -181,6 +185,13 @@ export default function Condominios({ api }) {
         O que for salvo aqui aparece no app dos moradores e é usado pelo lembrete das 6h30. Para tirar um condomínio do
         app, desmarque “Ativo”.
       </p>
+
+      {lembrete && (
+        <div className={`situacao situacao-${lembrete.nivel}`} role="status">
+          <strong>🔔 {lembrete.titulo}</strong>
+          <span>{lembrete.detalhe}</span>
+        </div>
+      )}
 
       {aviso && (
         <p className="aviso-ok" role="status">
