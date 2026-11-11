@@ -1,34 +1,72 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCondominios } from "../lib/condominios.js";
+import { buscarCondominios, condominioPorId, termoValido, MINIMO_LETRAS } from "../lib/condominios.js";
 import { linkWhatsapp } from "../data/contatos.js";
-import { normalizar } from "../lib/busca.js";
 import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
-import { IconeBusca } from "../components/Icones.jsx";
+import { IconeBusca, IconePredio } from "../components/Icones.jsx";
 
-export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = false, sugerido = null }) {
-  const condominios = useCondominios();
-  const [busca, setBusca] = useState("");
-  // null = o morador ainda não tocou: usa o atual ou o que veio no QR Code do cartaz.
-  const [marcado, setEscolhido] = useState(null);
-  const escolhido = marcado ?? atual?.id ?? sugerido ?? "";
+// O morador digita parte do nome e vê SÓ os condomínios que combinam (no máximo 3).
+// Pelo QR Code do cartaz, o condomínio já vem marcado.
+export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = false, idDoLink = null }) {
+  const [texto, setTexto] = useState("");
+  const [resultados, setResultados] = useState([]);
+  const [situacao, setSituacao] = useState("digitando"); // digitando | buscando | pronto | erro
+  const [marcado, setMarcado] = useState(null);
+  const [veioDoQr, setVeioDoQr] = useState(false);
   const navegar = useNavigate();
 
-  const lista = useMemo(() => {
-    const termo = normalizar(busca);
-    return [...condominios]
-      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
-      .filter((c) => !termo || normalizar(`${c.nome} ${c.regiao ?? ""}`).includes(termo));
-  }, [busca, condominios]);
+  // Veio pelo QR Code: busca o condomínio do cartaz.
+  useEffect(() => {
+    if (!idDoLink) return;
+    let ativo = true;
+    condominioPorId(idDoLink).then((r) => {
+      if (!ativo || !r.condominio) return;
+      setResultados([r.condominio]);
+      setMarcado(r.condominio);
+      setVeioDoQr(true);
+      setSituacao("pronto");
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [idDoLink]);
 
-  const temExemplo = condominios.some((c) => c.exemplo);
+  // Busca enquanto digita (espera o morador parar de digitar um pouquinho).
+  useEffect(() => {
+    if (!termoValido(texto)) return;
+    let ativo = true;
+    const relogio = setTimeout(() => {
+      setSituacao("buscando");
+      buscarCondominios(texto).then((r) => {
+        if (!ativo) return;
+        setResultados(r.lista);
+        setSituacao(r.ok ? "pronto" : "erro");
+      });
+    }, 400);
+    return () => {
+      ativo = false;
+      clearTimeout(relogio);
+    };
+  }, [texto]);
+
+  function mudarTexto(valor) {
+    setTexto(valor);
+    setVeioDoQr(false);
+    if (!termoValido(valor)) {
+      setResultados([]);
+      setMarcado(null);
+      setSituacao("digitando");
+    }
+  }
 
   function confirmar(e) {
     e.preventDefault();
-    if (!escolhido) return;
-    aoEscolher(escolhido);
+    if (!marcado) return;
+    aoEscolher(marcado);
     navegar("/");
   }
+
+  const temExemplo = resultados.some((c) => c.exemplo);
 
   return (
     <form onSubmit={confirmar} className="pagina">
@@ -37,9 +75,9 @@ export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = fa
           <p className="sobretitulo">Bem-vindo(a)!</p>
           <h1>Qual é o seu condomínio?</h1>
           <p>
-            {sugerido
+            {veioDoQr
               ? "Seu condomínio já está marcado. Confira e toque em Confirmar."
-              : "Escolha uma vez e o app mostra o dia da sua coleta seletiva."}{" "}
+              : "Digite o nome do seu condomínio. O app mostra o dia da sua coleta seletiva."}{" "}
             A escolha fica salva só neste celular.
           </p>
         </div>
@@ -47,54 +85,77 @@ export default function EscolherCondominio({ atual, aoEscolher, primeiraVez = fa
         <Cabecalho titulo="Trocar condomínio" voltar="/" />
       )}
 
-      {temExemplo && <AvisoPreencher>A lista abaixo ainda é de exemplo.</AvisoPreencher>}
-
-      {condominios.length > 6 && (
-        <label className="campo-busca">
-          <IconeBusca tamanho={20} />
-          <span className="sr">Buscar condomínio</span>
-          <input
-            type="search"
-            placeholder="Buscar pelo nome"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
-        </label>
+      {atual && (
+        <div className="condominio-atual">
+          <IconePredio tamanho={22} />
+          <div>
+            <small>Condomínio atual</small>
+            <strong>{atual.nome}</strong>
+          </div>
+        </div>
       )}
 
-      <fieldset className="lista-opcoes">
-        <legend className="sr">Condomínios atendidos</legend>
-        {lista.map((c) => (
-          <label key={c.id} className={`opcao ${escolhido === c.id ? "opcao-marcada" : ""}`}>
-            <input
-              type="radio"
-              name="condominio"
-              value={c.id}
-              checked={escolhido === c.id}
-              onChange={() => setEscolhido(c.id)}
-            />
-            <span className="opcao-texto">
-              <strong>{c.nome}</strong>
-              {c.regiao && <small>{c.regiao}</small>}
-            </span>
-          </label>
-        ))}
-        {lista.length === 0 && (
-          <p className="vazio">
-            {condominios.length === 0 ? "Nenhum condomínio cadastrado ainda." : "Nenhum condomínio encontrado."}
+      <label className="campo-busca">
+        <IconeBusca tamanho={20} />
+        <span className="sr">Nome do seu condomínio</span>
+        <input
+          type="search"
+          placeholder="Nome do seu condomínio"
+          value={texto}
+          onChange={(e) => mudarTexto(e.target.value)}
+          autoComplete="off"
+          enterKeyHint="search"
+        />
+      </label>
+      <p className="dica">
+        Digite pelo menos {MINIMO_LETRAS} letras do nome. Ex.: <strong>Mirante</strong>. Se você tem o cartaz da coleta,
+        é só apontar a câmera para o QR Code.
+      </p>
+
+      {temExemplo && <AvisoPreencher>Modo de teste: condomínios de exemplo.</AvisoPreencher>}
+
+      <div aria-live="polite">
+        {situacao === "buscando" && <p className="vazio">Procurando…</p>}
+        {situacao === "erro" && (
+          <p className="erro erro-bloco" role="alert">
+            Não foi possível procurar agora. Confira a internet e tente de novo.
           </p>
         )}
-      </fieldset>
+        {situacao === "pronto" && resultados.length === 0 && (
+          <p className="vazio">Nenhum condomínio encontrado com esse nome. Confira se escreveu certo.</p>
+        )}
+      </div>
+
+      {resultados.length > 0 && (
+        <fieldset className="lista-opcoes">
+          <legend className="sr">Condomínios encontrados</legend>
+          {resultados.map((c) => (
+            <label key={c.id} className={`opcao ${marcado?.id === c.id ? "opcao-marcada" : ""}`}>
+              <input
+                type="radio"
+                name="condominio"
+                value={c.id}
+                checked={marcado?.id === c.id}
+                onChange={() => setMarcado(c)}
+              />
+              <span className="opcao-texto">
+                <strong>{c.nome}</strong>
+                {c.regiao && <small>{c.regiao}</small>}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      )}
 
       <div className="rodape-fixo">
-        <button type="submit" className="botao botao-primario botao-largo" disabled={!escolhido}>
+        <button type="submit" className="botao botao-primario botao-largo" disabled={!marcado}>
           Confirmar
         </button>
       </div>
 
       <p className="nota-centro">
         Não encontrou o seu condomínio?{" "}
-        <a href={linkWhatsapp("Olá! Meu condomínio não aparece no app da Ecolimpo.")} target="_blank" rel="noreferrer">
+        <a href={linkWhatsapp("Olá! Não encontrei meu condomínio no app da Ecolimpo.")} target="_blank" rel="noreferrer">
           Fale com a cooperativa
         </a>
         .
