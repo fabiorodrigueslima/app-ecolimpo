@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useCondominios } from "../lib/condominios.js";
+import { normalizarCondominio } from "../lib/condominios.js";
+import { BANCO_LIGADO } from "../lib/config.js";
+import { condominios as doArquivo } from "../data/condominios.js";
+import { apiPainel, sessaoAtual } from "../painel/sessao.js";
 import { descreverDias, formatarHorario, periodoDoHorario } from "../lib/coleta.js";
 import { linkDoCondominio, lerCondominioDoLink, enderecoCurto, URL_APP } from "../lib/link.js";
 import { svgDoQr } from "../lib/qr.js";
@@ -25,8 +28,57 @@ const VANTAGENS = [
   { Icone: IconeConversa, texto: "Avalie e fale com a cooperativa" },
 ];
 
+// A lista de condomínios é privada: o cartaz só abre para quem está logado no painel.
+function useCondominiosDaEquipe() {
+  const [estado, setEstado] = useState(() => {
+    if (!BANCO_LIGADO) return { lista: doArquivo.map(normalizarCondominio), situacao: "pronto" };
+    if (!sessaoAtual()) return { lista: [], situacao: "sem-acesso" };
+    return { lista: [], situacao: "carregando" };
+  });
+
+  useEffect(() => {
+    if (estado.situacao !== "carregando") return;
+    let ativo = true;
+    apiPainel.listarCondominios().then((r) => {
+      if (!ativo) return;
+      if (r.ok) setEstado({ lista: r.dados.filter((c) => c.ativo).map(normalizarCondominio), situacao: "pronto" });
+      else setEstado({ lista: [], situacao: r.status === 401 || r.status === 403 ? "sem-acesso" : "erro" });
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [estado.situacao]);
+
+  return estado;
+}
+
 export default function Cartaz() {
-  const condominios = useCondominios();
+  const { lista, situacao } = useCondominiosDaEquipe();
+  if (situacao === "pronto") return <CartazConteudo condominios={lista} />;
+  return (
+    <div className="cartaz-pagina">
+      <div className="cartaz-ferramentas">
+        <h1>Cartaz com QR Code</h1>
+        {situacao === "carregando" && <p className="carregando">Carregando…</p>}
+        {situacao === "sem-acesso" && (
+          <>
+            <p>O cartaz é só para a equipe da cooperativa. Entre no painel e abra o cartaz pela aba Condomínios.</p>
+            <Link to="/painel" className="botao botao-primario botao-largo">
+              Entrar no painel
+            </Link>
+          </>
+        )}
+        {situacao === "erro" && (
+          <p className="erro erro-bloco" role="alert">
+            Não foi possível carregar os condomínios. Confira a internet e recarregue a página.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CartazConteudo({ condominios }) {
   const { search } = useLocation();
   const ordenados = useMemo(
     () => [...condominios].sort((a, b) => Number(b.piloto) - Number(a.piloto) || a.nome.localeCompare(b.nome, "pt-BR")),
@@ -62,8 +114,8 @@ export default function Cartaz() {
           </p>
         )}
         <p className="aviso-preencher" role="note">
-          <strong>Atenção:</strong> imprima só depois que o app estiver publicado em <strong>{enderecoCurto()}</strong>{" "}
-          e testado com um celular. Antes disso, o QR Code abre uma página vazia.
+          <strong>Antes de imprimir vários:</strong> imprima um, aponte a câmera do celular para o QR Code e confira se
+          abre <strong>{enderecoCurto()}</strong> com o condomínio certo já marcado.
         </p>
         <button type="button" className="botao botao-primario botao-largo" onClick={() => window.print()}>
           Imprimir (folha A4)

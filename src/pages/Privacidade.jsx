@@ -19,7 +19,7 @@ export default function Privacidade() {
           momento.
         </li>
         <li>
-          <strong>Uma cópia da lista de condomínios</strong>, para o app abrir mesmo sem internet.
+          <strong>Os dados do seu condomínio</strong> (dias e horário da coleta), para o app abrir mesmo sem internet.
         </li>
         <li>
           <strong>O mês em que você respondeu a pesquisa</strong>, para cada celular responder uma vez por mês.
