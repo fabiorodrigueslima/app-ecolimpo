@@ -66,6 +66,11 @@ export default function Privacidade() {
           Os avisos do lembrete passam pelo serviço de notificações do seu celular (Google, Apple, Mozilla ou Microsoft),
           que só entrega a mensagem.
         </li>
+        <li>
+          Para proteger o app contra robôs, a pesquisa, as mensagens e o lembrete passam por uma verificação de segurança
+          da <strong>Cloudflare (Turnstile)</strong>. Ela usa informações técnicas do navegador e o endereço de internet
+          (IP) só para confirmar que é uma pessoa, e não guarda o que você escreveu.
+        </li>
       </ul>
 
       <h2>Por quanto tempo guardamos</h2>
