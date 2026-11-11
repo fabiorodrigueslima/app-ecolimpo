@@ -58,8 +58,15 @@ test("o banco (SQL 010) segue as mesmas regras do app", () => {
   assert.match(sql, new RegExp(`char_length\\(termo\\) < ${MINIMO_LETRAS}`));
   assert.match(sql, new RegExp(`limit ${MAXIMO_RESULTADOS};`));
   assert.match(sql, /revoke select on public\.condominios from anon/);
-  // Cada letra acentuada que o banco troca vira a mesma letra que o app usa.
+});
+
+test("o banco troca acentos MINÚSCULOS e MAIÚSCULOS igual ao app (SQL 011)", () => {
+  // No Supabase, lower() não mexe em letra acentuada: "Ó" continua "Ó".
+  // Por isso a troca do banco precisa ter as maiúsculas também.
+  const sql = readFileSync(new URL("../supabase/011_busca_acentos.sql", import.meta.url), "utf8");
   const [, de, para] = sql.match(/translate\(lower\(coalesce\(t, ''\)\),\s*'([^']+)',\s*'([^']+)'\)/);
   assert.equal([...de].length, [...para].length);
   [...de].forEach((letra, i) => assert.equal(normalizar(letra), [...para][i], `letra ${letra}`));
+  for (const letra of "ÁÉÍÓÚÂÊÔÃÕÇ") assert.ok(de.includes(letra), `falta a maiúscula ${letra}`);
+  for (const letra of "áéíóúâêôãõç") assert.ok(de.includes(letra), `falta a minúscula ${letra}`);
 });
