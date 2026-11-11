@@ -6,6 +6,7 @@ Tudo que aparece como **A PREENCHER** no app vem destes lugares.
 |---|---|
 | Condomínios, dias da semana, horário (9h ou 14h) e piloto | **Com o banco ligado:** cadastrar no painel (`/painel` › Condomínios). **Sem banco (teste):** `src/data/condominios.js` |
 | Lista oficial do que recicla e do que não recicla | `src/data/materiais.js` |
+| Frase de um catador ou catadora (e o primeiro nome, com autorização) | `src/data/reciclagemMundo.js` (`depoimento`) |
 | Prazo de guarda das respostas, responsável pelos dados e data da política | `src/data/privacidade.js` |
 | Quais condomínios fazem o piloto e por quanto tempo | Painel (marcar "Faz parte do teste piloto") e `PILOTO.md` |
 | Nome e e-mail de quem acessa o painel | Supabase: login em Authentication › Users, e o e-mail na tabela `equipe` (final de `supabase/004_painel.sql`) |
