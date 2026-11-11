@@ -89,7 +89,7 @@ export async function ligarLembrete(condominioId) {
   const r = await banco.funcao("salvar_inscricao", argumentosInscricao(inscricao.toJSON(), condominioId));
   if (!r.ok) {
     await inscricao.unsubscribe().catch(() => {});
-    return { ok: false, motivo: "rede" };
+    return { ok: false, motivo: r.limite ? "limite" : "rede" };
   }
   return { ok: true };
 }

@@ -32,7 +32,10 @@ export function criarCliente({ url, chave, buscar = globalThis.fetch, limiteMs =
     const relogio = setTimeout(() => controle.abort(), limiteMs);
     try {
       const resposta = await buscar(endereco, { ...opcoes, signal: controle.signal });
-      return resposta.ok ? { ok: true } : { ok: false, status: resposta.status };
+      if (resposta.ok) return { ok: true };
+      // O banco avisa "limite_de_envios" quando chegam envios demais (proteção contra spam).
+      const texto = typeof resposta.text === "function" ? await resposta.text().catch(() => "") : "";
+      return { ok: false, status: resposta.status, limite: texto.includes("limite_de_envios") };
     } catch {
       return { ok: false, status: 0 }; // sem internet ou demorou demais
     } finally {

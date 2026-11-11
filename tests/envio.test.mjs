@@ -44,7 +44,19 @@ test("envio de mensagem chega ao banco com os campos certos", async () => {
 
 test("erro do banco ou falta de internet viram falha (app pede para tentar de novo)", async () => {
   const recusou = criarInsercao({ url: URL, chave: CHAVE, buscar: async () => ({ ok: false, status: 401 }) });
-  assert.deepEqual(await recusou("respostas", {}), { ok: false, status: 401 });
+  assert.deepEqual(await recusou("respostas", {}), { ok: false, status: 401, limite: false });
+
+  // Proteção contra spam: o banco responde "limite_de_envios" e o app reconhece.
+  const limite = criarInsercao({
+    url: URL,
+    chave: CHAVE,
+    buscar: async () => ({
+      ok: false,
+      status: 400,
+      text: async () => '{"code":"P0001","message":"limite_de_envios: muitos envios deste condomínio agora"}',
+    }),
+  });
+  assert.deepEqual(await limite("respostas", {}), { ok: false, status: 400, limite: true });
 
   const semInternet = criarInsercao({
     url: URL,

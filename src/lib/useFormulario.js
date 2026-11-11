@@ -30,7 +30,7 @@ export function useFormulario(inicial, validar, montar) {
     }
     setEstado("enviando");
     const r = await enviarResposta(montar(dados)).catch(() => ({ ok: false }));
-    setEstado(r.ok ? "enviado" : "falhou");
+    setEstado(r.ok ? "enviado" : r.limite ? "limite" : "falhou");
   }
 
   return { dados, mudar, limparErro, erros, setErros, estado, enviar, idsCondominios };

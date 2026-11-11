@@ -7,6 +7,7 @@ const ERROS = {
   recusado: "Você não permitiu as notificações. Toque em “Ligar lembrete” de novo e escolha “Permitir”.",
   bloqueado: "As notificações estão bloqueadas neste celular. Veja abaixo como liberar.",
   rede: "Não foi possível ligar agora. Confira a internet e tente de novo.",
+  limite: "Muitas pessoas estão ligando o lembrete agora. Tente de novo daqui a alguns minutos.",
   erro: "Não foi possível ligar o lembrete neste celular. Tente de novo mais tarde.",
 };
 

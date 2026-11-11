@@ -54,6 +54,11 @@ export function BotaoEnviar({ estado }) {
           Não foi possível enviar agora. Confira a internet e tente de novo.
         </p>
       )}
+      {estado === "limite" && (
+        <p className="erro erro-bloco" role="alert">
+          Recebemos muitos envios neste momento. Por favor, tente de novo daqui a alguns minutos.
+        </p>
+      )}
       <button type="submit" className="botao botao-primario botao-largo" disabled={estado === "enviando"}>
         {estado === "enviando" ? "Enviando…" : "Enviar"}
       </button>
