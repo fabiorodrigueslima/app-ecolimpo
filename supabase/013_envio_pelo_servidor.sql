@@ -4,8 +4,8 @@
 -- ATENÇÃO, ORDEM CERTA:
 --   1. Criar o Turnstile na Cloudflare e colocar as chaves na Vercel.
 --   2. Publicar a versão do app com o anti-robô (envios via api/enviar).
---   3. Testar uma pesquisa pelo app publicado.
---   4. SÓ DEPOIS rodar este arquivo. (Antes disso, os envios parariam.)
+--   3. Rodar este arquivo LOGO EM SEGUIDA: ele dá ao servidor a permissão de
+--      gravar. Sem ele, a versão nova não consegue gravar respostas.
 --
 -- O que muda:
 --   * O app (morador) NÃO grava mais direto em "respostas". Quem grava é o
