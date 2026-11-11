@@ -25,14 +25,14 @@ export function CampoCondominio({ valor, mudar, erro }) {
 }
 
 
-export function Obrigado({ titulo }) {
+export function Obrigado({ titulo, texto = "A cooperativa Ecolimpo agradece a sua participação." }) {
   return (
     <div className="pagina obrigado">
       <span className="obrigado-icone">
         <IconeCheck tamanho={40} />
       </span>
       <h1>{titulo}</h1>
-      <p>A cooperativa Ecolimpo agradece a sua participação.</p>
+      <p>{texto}</p>
       {!ENVIO_LIGADO && (
         <p className="aviso-preencher" role="note">
           <strong>Versão de teste:</strong> a resposta ainda não é enviada à cooperativa. O envio será ligado na próxima

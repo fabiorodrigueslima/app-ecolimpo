@@ -10,6 +10,25 @@ export function lerCondominioSalvo() {
   }
 }
 
+// Mês em que este celular respondeu a pesquisa (ex.: "2026-11").
+const CHAVE_PESQUISA = "ecolimpo:pesquisa-mes";
+
+export function lerMesDaPesquisa() {
+  try {
+    return localStorage.getItem(CHAVE_PESQUISA);
+  } catch {
+    return null;
+  }
+}
+
+export function salvarMesDaPesquisa(mes) {
+  try {
+    localStorage.setItem(CHAVE_PESQUISA, mes);
+  } catch {
+    // sem armazenamento: segue sem guardar
+  }
+}
+
 export function salvarCondominio(id) {
   try {
     if (id) localStorage.setItem(CHAVE, id);

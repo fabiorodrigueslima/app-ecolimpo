@@ -33,5 +33,5 @@ export function useFormulario(inicial, validar, montar) {
     setEstado(r.ok ? "enviado" : "falhou");
   }
 
-  return { dados, mudar, limparErro, erros, estado, enviar };
+  return { dados, mudar, limparErro, erros, setErros, estado, enviar, idsCondominios };
 }
