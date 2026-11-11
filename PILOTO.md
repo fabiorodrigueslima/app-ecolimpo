@@ -19,7 +19,7 @@ Cada item com 🔒 precisa da sua autorização antes de ser feito.
 4. 🔒 **Publicar o app:** criar o repositório no GitHub, o projeto na Vercel e o endereço `app.cooperaecolimpo.com.br`. Depois, colocar as variáveis do `.env.example` no painel da Vercel.
 5. Rodar `supabase/003_agendamento.sql` (o despertador das 6h30), trocando `COLE_AQUI_O_SEGREDO` pelo `LEMBRETE_SEGREDO`.
 6. No painel do app (`/painel` › Condomínios), cadastrar os condomínios do piloto com os dias e horários reais e marcar **"Faz parte do teste piloto"**.
-7. Trocar a lista de exemplo do "Recicla ou não?" pela lista oficial (`src/data/materiais.js`) e preencher `src/data/privacidade.js`.
+7. Colocar a frase do catador (`src/data/reciclagemMundo.js`) e preencher `src/data/privacidade.js`.
 
 ## 2. Testar com celulares de verdade (antes dos moradores)
 
