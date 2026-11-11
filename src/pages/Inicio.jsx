@@ -29,7 +29,7 @@ export default function Inicio({ condominio }) {
           </span>
           <span>
             <strong>Recicla ou não recicla?</strong>
-            <small>Busque um material e veja como separar</small>
+            <small>Veja o que separar para a coleta seletiva</small>
           </span>
           <IconeSeta tamanho={20} />
         </Link>

@@ -13,10 +13,9 @@ import {
   rotuloDaColeta,
   conferirCondominios,
 } from "../src/lib/coleta.js";
-import { buscarMateriais, normalizar } from "../src/lib/busca.js";
-import { validarPesquisa, validarMensagem, montarPesquisa, montarMensagem } from "../src/lib/formularios.js";
+import { normalizar } from "../src/lib/busca.js";
+import { validarPesquisa, validarMensagem, montarPesquisa, montarMensagem, tipoDoLink } from "../src/lib/formularios.js";
 import { condominios } from "../src/data/condominios.js";
-import { materiais } from "../src/data/materiais.js";
 
 // 10/11/2026 é uma terça-feira.
 const TERCA_0630_BRASILIA = new Date("2026-11-10T09:30:00Z"); // horário do lembrete
@@ -77,25 +76,16 @@ test("arquivo de condomínios está preenchido corretamente", () => {
   assert.ok(conferirCondominios([{ id: "X y", nome: "", dias: [7], horario: "10:00" }]).length >= 3);
 });
 
-test("busca de materiais ignora acentos e maiúsculas", () => {
+test("busca ignora acentos e maiúsculas", () => {
   assert.equal(normalizar("  Alumínio "), "aluminio");
-  const lista = [
-    { nome: "Caixa de pizza", outros: [], categoria: "Papel" },
-    { nome: "Lata de alumínio", outros: ["latinha"], categoria: "Metal" },
-  ];
-  assert.deepEqual(buscarMateriais(lista, "PIZZA").map((m) => m.nome), ["Caixa de pizza"]);
-  assert.deepEqual(buscarMateriais(lista, "aluminio").map((m) => m.nome), ["Lata de alumínio"]);
-  assert.deepEqual(buscarMateriais(lista, "latinha").map((m) => m.nome), ["Lata de alumínio"]);
-  assert.equal(buscarMateriais(lista, "").length, 2);
-  assert.equal(buscarMateriais(lista, "vidro").length, 0);
+  assert.equal(normalizar("CONDOMÍNIO PRIVE MONACO"), "condominio prive monaco");
 });
 
-test("arquivo de materiais tem os campos necessários", () => {
-  for (const m of materiais) {
-    assert.ok(m.nome, "falta nome");
-    assert.ok(["sim", "nao", "depende"].includes(m.recicla), `${m.nome}: recicla inválido`);
-    assert.ok(m.preparo, `${m.nome}: falta preparo`);
-  }
+test("link de dúvida já marca o tipo da mensagem", () => {
+  assert.equal(tipoDoLink("?tipo=duvida"), "duvida");
+  assert.equal(tipoDoLink("?tipo=elogio"), "elogio");
+  assert.equal(tipoDoLink("?tipo=qualquer-coisa"), "");
+  assert.equal(tipoDoLink(""), "");
 });
 
 const ids = ["a", "b"];

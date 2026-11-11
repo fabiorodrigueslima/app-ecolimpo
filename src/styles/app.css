@@ -204,19 +204,6 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 }
 .campo-busca:focus-within { border-color: var(--brand-green); }
 .campo-busca input { flex: 1; min-width: 0; min-height: 52px; border: 0; outline: 0; background: transparent; font-size: 1.05rem; }
-.materiais { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.material { padding: 16px; border: 1px solid var(--border); border-left: 6px solid var(--border); border-radius: var(--radius); background: #fff; }
-.material-sim { border-left-color: var(--success); }
-.material-nao { border-left-color: var(--error); }
-.material-depende { border-left-color: #d9a400; }
-.material-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.material h2 { margin: 0; font-size: 1.1rem; }
-.material-categoria { color: var(--text-muted); }
-.material p { margin: 8px 0 0; }
-.selo { flex: none; padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 800; }
-.selo-sim { background: #e2f1e6; color: var(--success); }
-.selo-nao { background: #fde8e6; color: var(--error); }
-.selo-depende { background: #fff3cc; color: var(--warning); }
 
 /* ===== Formulários ===== */
 .campo, .grupo { display: grid; gap: 6px; margin: 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
@@ -315,6 +302,14 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .guia-sim .guia-item-icone { background: #e2f1e6; color: var(--brand-green-dark); }
 .guia-nao .guia-item-icone { background: #fbe9df; color: var(--guia-laranja-escuro); }
 @media (max-width: 340px) { .guia-separacao { grid-template-columns: 1fr; } }
+
+/* ===== Dúvida sobre material (Recicla) ===== */
+.duvida-material { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 24px 20px; background: linear-gradient(180deg, #fff 0%, var(--surface-soft) 100%); }
+.duvida-material h2 { margin: 0; font-size: 1.2rem; justify-content: center; }
+.duvida-material p { margin: 0; color: var(--text-muted); }
+.duvida-icone { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: #e3edf5; color: var(--brand-blue); }
+.duvida-rodape { font-size: 0.9rem; }
+.duvida-rodape a { font-weight: 700; color: var(--brand-green-dark); }
 
 /* ===== Lembrete ===== */
 .cartao-lembrete { display: grid; gap: 12px; }

@@ -1,17 +1,11 @@
-import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { materiais } from "../data/materiais.js";
-import { buscarMateriais, RESPOSTAS } from "../lib/busca.js";
-import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
-import { IconeBusca } from "../components/Icones.jsx";
+import { Cabecalho } from "../components/Comuns.jsx";
+import { IconeConversa, IconeWhatsapp } from "../components/Icones.jsx";
 import { VoceSabia, Depoimento } from "../components/VoceSabia.jsx";
 import GuiaSeparacao from "../components/GuiaSeparacao.jsx";
+import { linkWhatsapp } from "../data/contatos.js";
 
 export default function Recicla() {
-  const [termo, setTermo] = useState("");
-  const resultado = useMemo(() => buscarMateriais(materiais, termo), [termo]);
-  const temExemplo = materiais.some((m) => m.exemplo);
-
   return (
     <div className="pagina">
       <Cabecalho titulo="Recicla ou não recicla?" />
@@ -22,53 +16,25 @@ export default function Recicla() {
       <h2 className="titulo-secao">O que a cooperativa recicla e o que não recicla</h2>
       <GuiaSeparacao />
 
-      <h2 className="titulo-secao">Dúvida sobre um item?</h2>
-      <p className="cabecalho-sub">Digite o nome do material, por exemplo: caixa de pizza.</p>
-      {temExemplo && <AvisoPreencher>A lista detalhada da busca ainda vai ser cadastrada.</AvisoPreencher>}
-
-      <label className="campo-busca">
-        <IconeBusca tamanho={20} />
-        <span className="sr">Buscar material</span>
-        <input
-          type="search"
-          placeholder="Buscar material"
-          value={termo}
-          onChange={(e) => setTermo(e.target.value)}
-          enterKeyHint="search"
-          autoComplete="off"
-        />
-      </label>
-
-      <p className="sr" aria-live="polite">
-        {resultado.length} {resultado.length === 1 ? "material encontrado" : "materiais encontrados"}
-      </p>
-
-      <ul className="materiais">
-        {resultado.map((m) => {
-          const r = RESPOSTAS[m.recicla];
-          return (
-            <li key={m.nome} className={`material material-${r.classe}`}>
-              <div className="material-topo">
-                <h2>{m.nome}</h2>
-                <span className={`selo selo-${r.classe}`}>{r.rotulo}</span>
-              </div>
-              {m.categoria && <small className="material-categoria">{m.categoria}</small>}
-              <p>
-                <strong>{m.recicla === "nao" ? "Por quê: " : "Como preparar: "}</strong>
-                {m.preparo}
-              </p>
-            </li>
-          );
-        })}
-      </ul>
-
-      {resultado.length === 0 && (
-        <div className="cartao cartao-suave">
-          <p>
-            Não encontramos “{termo}”. <Link to="/fale/mensagem">Pergunte à cooperativa</Link> e a gente responde.
-          </p>
-        </div>
-      )}
+      <section className="cartao duvida-material" aria-labelledby="duvida-titulo">
+        <span className="duvida-icone">
+          <IconeConversa tamanho={26} />
+        </span>
+        <h2 id="duvida-titulo">Ficou com dúvida sobre algum material?</h2>
+        <p>
+          Envie sua dúvida para a equipe da Cooperativa Ecolimpo. Ela nos ajuda a melhorar as orientações para todos os
+          moradores.
+        </p>
+        <Link to="/fale/mensagem?tipo=duvida" className="botao botao-primario botao-largo">
+          Enviar minha dúvida
+        </Link>
+        <p className="duvida-rodape">
+          Prefere uma resposta direta?{" "}
+          <a href={linkWhatsapp("Olá! Tenho uma dúvida sobre a separação dos recicláveis.")} target="_blank" rel="noreferrer">
+            <IconeWhatsapp tamanho={16} className="inline" /> Fale pelo WhatsApp
+          </a>
+        </p>
+      </section>
     </div>
   );
 }
