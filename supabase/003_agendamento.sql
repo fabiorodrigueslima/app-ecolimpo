@@ -1,6 +1,9 @@
 -- =====================================================================
 -- ETAPA 3 — "Despertador" diário do lembrete (6h30 de Brasília)
 -- =====================================================================
+-- Endereço chamado: app-ecolimpo.vercel.app (o endereço fixo da Vercel, que não
+-- depende do DNS do domínio; leva ao mesmo app de app.cooperaecolimpo.com.br).
+--
 -- ATENÇÃO: rode este arquivo SÓ DEPOIS que o app estiver publicado na Vercel
 -- (ele chama o endereço do app). Antes de rodar, troque (1 lugar só):
 --   COLE_AQUI_O_SEGREDO -> o mesmo valor de LEMBRETE_SEGREDO configurado na Vercel
@@ -39,7 +42,7 @@ select cron.schedule(
   '30 9 * * *',
   $$
   select net.http_post(
-    url := 'https://app.cooperaecolimpo.com.br/api/lembrete',
+    url := 'https://app-ecolimpo.vercel.app/api/lembrete',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'lembrete_segredo')
