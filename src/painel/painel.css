@@ -102,3 +102,7 @@
 .condominio .etiqueta:not(.etiqueta-piloto) { margin-left: 8px; }
 .botoes { display: flex; flex-wrap: wrap; gap: 10px; }
 .botoes .botao { flex: 1; }
+.mfa-qr { display: grid; justify-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+.mfa-qr img { width: 200px; height: 200px; }
+.mfa-chave { padding: 8px 10px; border-radius: 8px; background: var(--surface-soft); font-size: 0.95rem; letter-spacing: 0.08em; overflow-wrap: anywhere; text-align: center; }
+.campo-codigo { font-size: 1.6rem !important; letter-spacing: 0.4em; text-align: center; font-variant-numeric: tabular-nums; }

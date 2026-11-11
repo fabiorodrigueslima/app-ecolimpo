@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BANCO_LIGADO } from "../lib/config.js";
-import { lerRetornoDoEmail } from "./regras.js";
-import { lerEmail, sair } from "./api.js";
-import { apiPainel as api, definirSessao, quandoExpirar, sessaoAtual } from "./sessao.js";
+import { lerRetornoDoEmail, lerAal, etapaDoMfa } from "./regras.js";
+import { lerEmail, lerFatores, sair } from "./api.js";
+import { apiPainel as api, definirSessao, obterToken, quandoExpirar, sessaoAtual } from "./sessao.js";
+import DuasEtapas from "./DuasEtapas.jsx";
 import Login from "./Login.jsx";
 import NovaSenha from "./NovaSenha.jsx";
 import Respostas from "./Respostas.jsx";
@@ -18,12 +19,13 @@ function estadoInicial() {
     definirSessao(retorno.sessao, { guardar: false });
     return { etapa: "nova-senha", aviso: "" };
   }
-  return { etapa: sessaoAtual() ? "verificando" : "login", aviso: retorno?.erro ?? "" };
+  return { etapa: sessaoAtual() ? "conferir-mfa" : "login", aviso: retorno?.erro ?? "" };
 }
 
 export default function Painel() {
   const [{ etapa, aviso }, setEstado] = useState(estadoInicial);
   const [aba, setAba] = useState("respostas");
+  const [mfa, setMfa] = useState(null); // { modo: "cadastrar" | "codigo", fatorId, token }
   const irPara = (proxima, novoAviso = "") => setEstado({ etapa: proxima, aviso: novoAviso });
   const sessao = sessaoAtual();
 
@@ -32,6 +34,26 @@ export default function Painel() {
     // Tira os códigos do link do e-mail da barra de endereço.
     if (window.location.hash) window.history.replaceState(null, "", window.location.pathname);
   }, []);
+
+  // Antes de tudo: o login já tem as 2 etapas? Se não, pede o código (ou o cadastro).
+  useEffect(() => {
+    if (etapa !== "conferir-mfa") return;
+    let ativo = true;
+    (async () => {
+      const token = await obterToken();
+      if (!ativo || !token) return; // sessão terminou: já voltou para o login
+      if (lerAal(token) === "aal2") return setEstado((e) => ({ ...e, etapa: "verificando" }));
+      const r = await lerFatores(token);
+      if (!ativo) return;
+      if (!r.ok) return setEstado((e) => ({ ...e, etapa: "sem-conexao" }));
+      const fator = r.fatores.find((f) => f.factor_type === "totp" && f.status === "verified");
+      setMfa({ modo: etapaDoMfa(r.fatores, "aal1"), fatorId: fator?.id ?? null, token });
+      setEstado((e) => ({ ...e, etapa: "duas-etapas" }));
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, [etapa]);
 
   // Confere se o login faz parte da equipe.
   useEffect(() => {
@@ -68,7 +90,7 @@ export default function Painel() {
         aviso={aviso}
         aoEntrar={(s) => {
           definirSessao(s);
-          irPara("verificando");
+          irPara("conferir-mfa");
         }}
       />
     );
@@ -78,18 +100,31 @@ export default function Painel() {
         sessao={sessao}
         aoTerminar={async () => {
           definirSessao({ ...sessao, email: await lerEmail(sessao.token) });
+          irPara("conferir-mfa");
+        }}
+      />
+    );
+  } else if (etapa === "duas-etapas" && mfa) {
+    corpo = (
+      <DuasEtapas
+        modo={mfa.modo}
+        token={mfa.token}
+        fatorId={mfa.fatorId}
+        aoSair={fazerSair}
+        aoConfirmar={(nova) => {
+          definirSessao({ ...nova, email: nova.email || sessao?.email || "" });
           irPara("verificando");
         }}
       />
     );
-  } else if (etapa === "verificando") {
+  } else if (etapa === "conferir-mfa" || etapa === "verificando") {
     corpo = <p className="carregando">Conferindo acesso…</p>;
   } else if (etapa === "sem-conexao") {
     corpo = (
       <div className="painel-caixa">
         <h1>Sem conexão</h1>
         <p>Não foi possível falar com o banco de dados. Confira a internet.</p>
-        <button type="button" className="botao botao-primario botao-largo" onClick={() => irPara("verificando")}>
+        <button type="button" className="botao botao-primario botao-largo" onClick={() => irPara("conferir-mfa")}>
           Tentar de novo
         </button>
       </div>
