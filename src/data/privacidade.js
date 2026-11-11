@@ -1,11 +1,13 @@
-// Prazos e responsáveis da política de privacidade — A PREENCHER.
-// A cooperativa precisa decidir estes valores antes de publicar o app.
+// Prazos e responsáveis da política de privacidade.
+// Definido pela cooperativa em 11/11/2026.
 
 export const privacidade = {
   // Por quanto tempo as respostas (pesquisa e mensagens) ficam guardadas.
-  prazoRespostas: "A PREENCHER",
-  // Quem cuida dos dados na cooperativa (nome ou cargo).
-  responsavel: "A PREENCHER",
-  // Data da última atualização da política (ex.: "10/11/2026").
-  atualizadaEm: "A PREENCHER",
+  // O banco apaga sozinho depois disso (supabase/007_limpeza_automatica.sql).
+  prazoRespostas: "12 meses",
+  prazoMeses: 12,
+  // Quem cuida dos dados (controlador, pela LGPD).
+  responsavel: "Cooperativa de Trabalho de Catadores Ecolimpo",
+  // Data da última atualização da política.
+  atualizadaEm: "11/11/2026",
 };

@@ -15,44 +15,72 @@ export default function Privacidade() {
       <h2>O que fica guardado só no seu celular</h2>
       <ul>
         <li>
-          <strong>O condomínio que você escolheu</strong>, para mostrar o dia da sua coleta. Essa informação não é
-          enviada para a cooperativa. Você pode trocar a qualquer momento, ou apagar limpando os dados do navegador.
+          <strong>O condomínio que você escolheu</strong>, para mostrar o dia da sua coleta. Você pode trocar a qualquer
+          momento.
+        </li>
+        <li>
+          <strong>Uma cópia da lista de condomínios</strong>, para o app abrir mesmo sem internet.
+        </li>
+        <li>
+          <strong>O mês em que você respondeu a pesquisa</strong>, para cada celular responder uma vez por mês.
         </li>
       </ul>
+      <p>Essas informações não são enviadas para a cooperativa. Para apagar, limpe os dados do navegador ou do app.</p>
 
       <h2>O que é enviado para a cooperativa</h2>
       <ul>
         <li>
-          <strong>Pesquisa de satisfação e mensagens:</strong> o condomínio (obrigatório), as notas ou o texto que você
-          escreveu e, só se você quiser, seu nome e apartamento.
+          <strong>Pesquisa de satisfação:</strong> o condomínio (obrigatório), as notas que você deu, a nota de
+          recomendação (0 a 10), se você separa os recicláveis em casa, os motivos marcados quando a nota foi baixa e os
+          textos que você escreveu.
         </li>
         <li>
-          <strong>Lembrete da coleta (quando você ativar):</strong> um código técnico do seu navegador para enviar o aviso
-          e o condomínio escolhido. Não guardamos seu número de telefone.
+          <strong>Mensagens</strong> (elogio, sugestão, reclamação ou dúvida): o condomínio, o tipo e o texto.
+        </li>
+        <li>
+          Nas duas, <strong>só se você quiser</strong>: seu nome e apartamento.
+        </li>
+        <li>
+          <strong>Lembrete da coleta (quando você ativar):</strong> um código técnico criado pelo seu navegador para
+          receber o aviso e o condomínio escolhido. Não guardamos seu número de telefone.
         </li>
       </ul>
       <p>
-        Nunca pedimos CPF, telefone, e-mail ou endereço completo. Por favor, não escreva esses dados nas mensagens.
+        Nunca pedimos CPF, telefone, e-mail ou endereço completo. Por favor, não escreva esses dados nos textos.
       </p>
 
       <h2>Para que usamos</h2>
       <ul>
         <li>Melhorar a coleta seletiva e a orientação aos moradores.</li>
-        <li>Responder dúvidas e reclamações sobre o condomínio.</li>
+        <li>Entender dúvidas e reclamações sobre a coleta no condomínio.</li>
         <li>Enviar o lembrete no dia da coleta, só para quem pediu.</li>
       </ul>
       <p>Não vendemos nem compartilhamos seus dados com empresas de propaganda.</p>
 
+      <h2>Onde os dados ficam</h2>
+      <ul>
+        <li>
+          As respostas ficam num banco de dados do serviço <strong>Supabase</strong>, em servidor no Brasil (São Paulo).
+        </li>
+        <li>
+          Os avisos do lembrete passam pelo serviço de notificações do seu celular (Google, Apple, Mozilla ou Microsoft),
+          que só entrega a mensagem.
+        </li>
+      </ul>
+
       <h2>Por quanto tempo guardamos</h2>
       <ul>
-        <li>Respostas da pesquisa e mensagens: {privacidade.prazoRespostas}.</li>
+        <li>
+          Respostas da pesquisa e mensagens: <strong>{privacidade.prazoRespostas}</strong>. Depois disso, são apagadas
+          automaticamente.
+        </li>
         <li>Inscrição do lembrete: até você desligar o lembrete ou desinstalar o app.</li>
       </ul>
 
       <h2>Quem pode ver</h2>
       <p>
-        Somente as pessoas da cooperativa autorizadas a usar o painel, com login e senha. Responsável pelos dados na
-        cooperativa: {privacidade.responsavel}.
+        Somente as pessoas da cooperativa autorizadas a usar o painel, com login e senha. Responsável pelos dados:{" "}
+        <strong>{privacidade.responsavel}</strong>.
       </p>
 
       <h2>Seus direitos</h2>
