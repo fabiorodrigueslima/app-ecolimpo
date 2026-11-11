@@ -176,7 +176,7 @@ export default function Pesquisa({ condominio }) {
             <li>Você pode responder sem se identificar.</li>
             <li>Suas respostas ajudam a cooperativa a melhorar o serviço.</li>
           </ul>
-          <CampoCondominio valor={dados.condominioId} mudar={mudar} erro={erros.condominioId} />
+          <CampoCondominio condominio={condominio} />
         </div>
       ) : (
         <div className="progresso" aria-label={`Pergunta ${passo} de ${TOTAL_PERGUNTAS}`}>

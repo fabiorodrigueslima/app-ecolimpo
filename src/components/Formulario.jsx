@@ -1,26 +1,20 @@
 import { Link } from "react-router-dom";
-import { useCondominios } from "../lib/condominios.js";
 import { ENVIO_LIGADO } from "../lib/envio.js";
-import { IconeCheck } from "./Icones.jsx";
+import { IconeCheck, IconePredio } from "./Icones.jsx";
 
-// Escolha do condomínio dentro dos formulários (já vem preenchido).
-export function CampoCondominio({ valor, mudar, erro }) {
-  const condominios = useCondominios();
+// Condomínio do morador nos formulários: fixo (a lista de condomínios é privada).
+export function CampoCondominio({ condominio }) {
   return (
-    <label className="campo">
-      <span>
-        Condomínio <span className="obrigatorio">(obrigatório)</span>
-      </span>
-      <select value={valor} onChange={(e) => mudar("condominioId", e.target.value)} required>
-        <option value="">Escolha…</option>
-        {condominios.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.nome}
-          </option>
-        ))}
-      </select>
-      {erro && <span className="erro">{erro}</span>}
-    </label>
+    <div className="condominio-atual">
+      <IconePredio tamanho={22} />
+      <div>
+        <small>Seu condomínio</small>
+        <strong>{condominio.nome}</strong>
+      </div>
+      <Link to="/condominio" className="link-pequeno">
+        Trocar
+      </Link>
+    </div>
   );
 }
 

@@ -26,7 +26,7 @@ export default function Mensagem({ condominio }) {
         voltar={veioDaDuvida ? "/recicla" : "/fale"}
       />
 
-      <CampoCondominio valor={dados.condominioId} mudar={mudar} erro={erros.condominioId} />
+      <CampoCondominio condominio={condominio} />
 
       <fieldset className="grupo">
         <legend>
