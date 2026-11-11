@@ -399,3 +399,5 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }
 }
+.verificacao-humana:empty { display: none; }
+.verificacao-humana { display: grid; justify-items: center; }

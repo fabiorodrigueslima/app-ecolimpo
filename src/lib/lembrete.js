@@ -2,7 +2,8 @@
 // A notificação em si é mostrada pelo service worker (public/sw.js) e
 // enviada todo dia pelo servidor (api/lembrete.js).
 
-import { banco, LEMBRETE_CONFIGURADO, PRODUCAO, VAPID_PUBLICA } from "./config.js";
+import { banco, LEMBRETE_CONFIGURADO, PRODUCAO, VAPID_PUBLICA, VERIFICACAO_LIGADA } from "./config.js";
+import { enviarPeloServidor } from "./envio.js";
 
 // ---------- Regras puras (testadas em tests/lembrete.test.mjs) ----------
 
@@ -69,7 +70,8 @@ export async function lembreteLigado() {
   }
 }
 
-export async function ligarLembrete(condominioId) {
+// token: comprovante do anti-robô (obrigatório quando a verificação está ligada).
+export async function ligarLembrete(condominioId, token) {
   const permissao = await Notification.requestPermission();
   if (permissao !== "granted") return { ok: false, motivo: permissao === "denied" ? "bloqueado" : "recusado" };
 
@@ -86,7 +88,10 @@ export async function ligarLembrete(condominioId) {
     return { ok: false, motivo: "erro" };
   }
 
-  const r = await banco.funcao("salvar_inscricao", argumentosInscricao(inscricao.toJSON(), condominioId));
+  const argumentos = argumentosInscricao(inscricao.toJSON(), condominioId);
+  const r = VERIFICACAO_LIGADA
+    ? await enviarPeloServidor("inscricao", argumentos, token)
+    : await banco.funcao("salvar_inscricao", argumentos);
   if (!r.ok) {
     await inscricao.unsubscribe().catch(() => {});
     return { ok: false, motivo: r.limite ? "limite" : "rede" };

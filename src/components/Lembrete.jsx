@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { formatarHorario } from "../lib/coleta.js";
 import { situacaoDoAparelho, lembreteLigado, ligarLembrete, desligarLembrete } from "../lib/lembrete.js";
 import { IconeSino, IconeCompartilhar, IconeCheck } from "./Icones.jsx";
+import VerificacaoHumana from "./VerificacaoHumana.jsx";
+import { VERIFICACAO_LIGADA } from "../lib/config.js";
 
 const ERROS = {
   recusado: "Você não permitiu as notificações. Toque em “Ligar lembrete” de novo e escolha “Permitir”.",
@@ -16,6 +18,8 @@ export default function Lembrete({ condominio }) {
   const [ligado, setLigado] = useState(null); // null = conferindo
   const [ocupado, setOcupado] = useState(false);
   const [erro, setErro] = useState("");
+  const [token, setToken] = useState(null); // comprovante do anti-robô
+  const [chaveVerificacao, setChaveVerificacao] = useState(0);
 
   useEffect(() => {
     if (situacao !== "pronto") return;
@@ -27,9 +31,18 @@ export default function Lembrete({ condominio }) {
   }, [situacao]);
 
   async function alternar() {
-    setOcupado(true);
     setErro("");
-    const r = ligado ? await desligarLembrete() : await ligarLembrete(condominio.id);
+    if (!ligado && VERIFICACAO_LIGADA && !token) {
+      setErro("Aguarde a verificação de segurança terminar (alguns segundos) e toque de novo.");
+      return;
+    }
+    setOcupado(true);
+    const r = ligado ? await desligarLembrete() : await ligarLembrete(condominio.id, token);
+    if (!ligado) {
+      // O comprovante só vale uma vez: prepara outro para uma nova tentativa.
+      setToken(null);
+      setChaveVerificacao((k) => k + 1);
+    }
     if (r.ok) setLigado(!ligado);
     else {
       setErro(ERROS[r.motivo] ?? ERROS.erro);
@@ -112,6 +125,7 @@ export default function Lembrete({ condominio }) {
           ) : (
             <p>Receba um aviso às 6h30 do dia da coleta para não esquecer de colocar os recicláveis para fora.</p>
           )}
+          {ligado === false && <VerificacaoHumana key={chaveVerificacao} aoVerificar={setToken} />}
           {erro && (
             <p className="erro erro-bloco" role="alert">
               {erro}

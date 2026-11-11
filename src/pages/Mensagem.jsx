@@ -3,12 +3,13 @@ import { TIPOS_MENSAGEM, LIMITES, validarMensagem, montarMensagem, tipoDoLink } 
 import { Cabecalho, CamposOpcionais, AvisoPrivacidade } from "../components/Comuns.jsx";
 import { CampoCondominio, Obrigado, BotaoEnviar } from "../components/Formulario.jsx";
 import { useFormulario } from "../lib/useFormulario.js";
+import VerificacaoHumana from "../components/VerificacaoHumana.jsx";
 
 export default function Mensagem({ condominio }) {
   const { search } = useLocation();
   const tipoInicial = tipoDoLink(search);
   const veioDaDuvida = tipoInicial === "duvida";
-  const { dados, mudar, erros, estado, enviar } = useFormulario(
+  const { dados, mudar, erros, estado, enviar, aoVerificar, chaveVerificacao } = useFormulario(
     { condominioId: condominio.id, tipo: tipoInicial, texto: "", nome: "", apartamento: "" },
     validarMensagem,
     montarMensagem,
@@ -68,6 +69,7 @@ export default function Mensagem({ condominio }) {
 
       <CamposOpcionais dados={dados} mudar={mudar} erros={erros} />
       <AvisoPrivacidade />
+      <VerificacaoHumana key={chaveVerificacao} aoVerificar={aoVerificar} />
       <BotaoEnviar estado={estado} />
     </form>
   );

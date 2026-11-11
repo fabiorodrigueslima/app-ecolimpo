@@ -16,6 +16,7 @@ import { CamposOpcionais, AvisoPrivacidade } from "../components/Comuns.jsx";
 import { CampoCondominio, Obrigado, BotaoEnviar } from "../components/Formulario.jsx";
 import { IconeVoltar, IconeEstrela } from "../components/Icones.jsx";
 import { useFormulario } from "../lib/useFormulario.js";
+import VerificacaoHumana from "../components/VerificacaoHumana.jsx";
 
 // Ordem das telas. "inicio" não conta no "Pergunta X de Y".
 const PASSOS = ["inicio", ...TEMAS_PESQUISA.map((t) => t.id), "nps", "habito", "final"];
@@ -94,7 +95,7 @@ function OQueAconteceu({ tema, dados, mudar, erro }) {
 export default function Pesquisa({ condominio }) {
   const [jaRespondeu] = useState(() => jaRespondeuNoMes(lerMesDaPesquisa()));
   const [passo, setPasso] = useState(0);
-  const { dados, mudar, erros, setErros, estado, enviar, idsCondominios } = useFormulario(
+  const { dados, mudar, erros, setErros, estado, enviar, idsCondominios, aoVerificar, chaveVerificacao } = useFormulario(
     pesquisaVazia(condominio.id),
     validarPesquisa,
     montarPesquisa,
@@ -257,6 +258,7 @@ export default function Pesquisa({ condominio }) {
           </label>
           <CamposOpcionais dados={dados} mudar={mudar} erros={erros} />
           <AvisoPrivacidade />
+          <VerificacaoHumana key={chaveVerificacao} aoVerificar={aoVerificar} />
         </section>
       )}
 

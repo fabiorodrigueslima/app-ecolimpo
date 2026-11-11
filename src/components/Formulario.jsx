@@ -48,6 +48,16 @@ export function BotaoEnviar({ estado }) {
           Não foi possível enviar agora. Confira a internet e tente de novo.
         </p>
       )}
+      {estado === "aguarde-verificacao" && (
+        <p className="erro erro-bloco" role="alert">
+          Aguarde a verificação de segurança terminar (alguns segundos) e toque em Enviar de novo.
+        </p>
+      )}
+      {estado === "robo" && (
+        <p className="erro erro-bloco" role="alert">
+          A verificação de segurança não confirmou o envio. Toque em Enviar de novo.
+        </p>
+      )}
       {estado === "limite" && (
         <p className="erro erro-bloco" role="alert">
           Recebemos muitos envios neste momento. Por favor, tente de novo daqui a alguns minutos.
