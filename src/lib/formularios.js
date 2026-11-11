@@ -14,7 +14,13 @@ export const TIPOS_MENSAGEM = [
   { id: "duvida", rotulo: "Dúvida" },
 ];
 
-export const LIMITES = { nome: 80, apartamento: 20, texto: 1000 };
+// Tipo que vem no endereço (ex.: /fale/mensagem?tipo=duvida). Só aceita tipos válidos.
+export function tipoDoLink(busca) {
+  const tipo = new URLSearchParams(busca ?? "").get("tipo");
+  return TIPOS_MENSAGEM.some((t) => t.id === tipo) ? tipo : "";
+}
+
+export const LIMITES ={ nome: 80, apartamento: 20, texto: 1000 };
 
 const limpar = (v) => {
   const t = String(v ?? "").trim();

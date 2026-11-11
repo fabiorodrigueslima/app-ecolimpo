@@ -1,20 +1,30 @@
-import { TIPOS_MENSAGEM, LIMITES, validarMensagem, montarMensagem } from "../lib/formularios.js";
+import { useLocation } from "react-router-dom";
+import { TIPOS_MENSAGEM, LIMITES, validarMensagem, montarMensagem, tipoDoLink } from "../lib/formularios.js";
 import { Cabecalho, CamposOpcionais } from "../components/Comuns.jsx";
 import { CampoCondominio, Obrigado, BotaoEnviar } from "../components/Formulario.jsx";
 import { useFormulario } from "../lib/useFormulario.js";
 
 export default function Mensagem({ condominio }) {
+  const { search } = useLocation();
+  const tipoInicial = tipoDoLink(search);
+  const veioDaDuvida = tipoInicial === "duvida";
   const { dados, mudar, erros, estado, enviar } = useFormulario(
-    { condominioId: condominio.id, tipo: "", texto: "", nome: "", apartamento: "" },
+    { condominioId: condominio.id, tipo: tipoInicial, texto: "", nome: "", apartamento: "" },
     validarMensagem,
     montarMensagem,
   );
 
-  if (estado === "enviado") return <Obrigado titulo="Mensagem recebida!" />;
+  if (estado === "enviado") return <Obrigado titulo={veioDaDuvida ? "Dúvida recebida!" : "Mensagem recebida!"} />;
 
   return (
     <form className="pagina" onSubmit={enviar} noValidate>
-      <Cabecalho titulo="Enviar mensagem" subtitulo="A cooperativa lê todas as mensagens." voltar="/fale" />
+      <Cabecalho
+        titulo={veioDaDuvida ? "Enviar dúvida" : "Enviar mensagem"}
+        subtitulo={
+          veioDaDuvida ? "Conte qual material gerou a dúvida. A equipe da cooperativa lê todas." : "A cooperativa lê todas as mensagens."
+        }
+        voltar={veioDaDuvida ? "/recicla" : "/fale"}
+      />
 
       <CampoCondominio valor={dados.condominioId} mudar={mudar} erro={erros.condominioId} />
 
@@ -48,6 +58,7 @@ export default function Mensagem({ condominio }) {
           value={dados.texto}
           onChange={(e) => mudar("texto", e.target.value)}
           maxLength={LIMITES.texto}
+          placeholder={veioDaDuvida ? "Ex.: Posso colocar caixa de pizza na coleta seletiva?" : undefined}
         />
         <small className="contador">
           {dados.texto.length}/{LIMITES.texto}
