@@ -14,7 +14,17 @@ import {
   conferirCondominios,
 } from "../src/lib/coleta.js";
 import { normalizar } from "../src/lib/busca.js";
-import { validarPesquisa, validarMensagem, montarPesquisa, montarMensagem, tipoDoLink } from "../src/lib/formularios.js";
+import {
+  validarPesquisa,
+  validarMensagem,
+  montarPesquisa,
+  montarMensagem,
+  tipoDoLink,
+  pesquisaVazia,
+  notaBaixa,
+  mesDeReferencia,
+  jaRespondeuNoMes,
+} from "../src/lib/formularios.js";
 import { condominios } from "../src/data/condominios.js";
 
 // 10/11/2026 é uma terça-feira.
@@ -90,24 +100,59 @@ test("link de dúvida já marca o tipo da mensagem", () => {
 
 const ids = ["a", "b"];
 
-test("pesquisa: só o condomínio e as notas são obrigatórios", () => {
-  const dados = { condominioId: "a", notas: { coleta: 5, mobilizacao: 4, atendimento: 3 } };
-  assert.equal(validarPesquisa(dados, ids).ok, true);
-  assert.deepEqual(montarPesquisa({ ...dados, nome: "  ", melhorar: " Mais avisos " }), {
+const pesquisaCompleta = () => ({
+  ...pesquisaVazia("a"),
+  notas: { coleta: 5, mobilizacao: "nao_sei", atendimento: 2 },
+  motivos: { coleta: ["nao_passou"], atendimento: ["demorou", "inventado"] },
+  detalhes: { coleta: "não deveria ir", atendimento: " Esperei 3 dias " },
+  nps: 9,
+  habito: "as_vezes",
+  melhorar: " Mais avisos ",
+  nome: "  ",
+});
+
+test("pesquisa completa: Não sei vira vazio e motivos só valem para nota baixa", () => {
+  assert.equal(validarPesquisa(pesquisaCompleta(), ids).ok, true);
+  assert.deepEqual(montarPesquisa(pesquisaCompleta()), {
     tipo: "pesquisa",
     condominio_id: "a",
     nome: null,
     apartamento: null,
     nota_coleta: 5,
-    nota_mobilizacao: 4,
-    nota_atendimento: 3,
+    nota_mobilizacao: null, // "Não sei / não utilizei" não entra na média
+    nota_atendimento: 2,
+    nps: 9,
+    habito: "as_vezes",
+    motivos: ["atendimento:demorou"], // coleta teve nota boa; "inventado" não existe
+    detalhes: { atendimento: "Esperei 3 dias" },
     texto: "Mais avisos",
   });
+});
 
-  const ruim = validarPesquisa({ condominioId: "z", notas: { coleta: 6 } }, ids);
+test("pesquisa: cada pergunta precisa de resposta", () => {
+  const ruim = validarPesquisa({ ...pesquisaVazia("z"), notas: { coleta: 6 }, nps: 11, habito: "nunca" }, ids);
   assert.equal(ruim.ok, false);
-  assert.ok(ruim.erros.condominioId);
-  assert.ok(ruim.erros.nota_coleta && ruim.erros.nota_mobilizacao && ruim.erros.nota_atendimento);
+  assert.deepEqual(Object.keys(ruim.erros).sort(), [
+    "condominioId",
+    "habito",
+    "nota_atendimento",
+    "nota_coleta",
+    "nota_mobilizacao",
+    "nps",
+  ]);
+  const longo = validarPesquisa({ ...pesquisaCompleta(), detalhes: { atendimento: "x".repeat(301) } }, ids);
+  assert.ok(longo.erros.detalhe_atendimento);
+  assert.equal(notaBaixa(2), true);
+  assert.equal(notaBaixa(3), false);
+  assert.equal(notaBaixa("nao_sei"), false);
+});
+
+test("uma resposta por celular por mês (horário de Brasília)", () => {
+  assert.equal(mesDeReferencia(new Date("2026-11-30T12:00:00Z")), "2026-11");
+  assert.equal(mesDeReferencia(new Date("2026-12-01T02:00:00Z")), "2026-11"); // ainda 30/11 em Brasília
+  assert.equal(jaRespondeuNoMes("2026-11", new Date("2026-11-11T12:00:00Z")), true);
+  assert.equal(jaRespondeuNoMes("2026-10", new Date("2026-11-11T12:00:00Z")), false);
+  assert.equal(jaRespondeuNoMes(null), false);
 });
 
 test("mensagem: tipo, texto e condomínio obrigatórios", () => {
