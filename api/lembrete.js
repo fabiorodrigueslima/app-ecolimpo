@@ -12,7 +12,7 @@
 import webpush from "web-push";
 import { contatos } from "../src/data/contatos.js";
 import { criarBancoServidor } from "../servidor/banco.js";
-import { enviarLembretesDoDia, pedidoAutorizado } from "../servidor/lembrete.js";
+import { enviarLembretesDoDia, pedidoAutorizado, registroDoEnvio } from "../servidor/lembrete.js";
 
 const NECESSARIAS = ["VITE_SUPABASE_URL", "SUPABASE_SECRET_KEY", "VITE_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "LEMBRETE_SEGREDO"];
 
@@ -40,9 +40,20 @@ export default async function handler(req, res) {
       enviarPush: (inscricao, corpo) => webpush.sendNotification(inscricao, corpo, { TTL: 6 * 3600, urgency: "high" }),
     });
     console.log("Lembrete da coleta:", JSON.stringify(resumo));
+    await anotar(banco, registroDoEnvio(resumo));
     return res.status(200).json(resumo);
   } catch (erro) {
     console.error("Lembrete da coleta falhou:", erro.message);
+    await anotar(banco, registroDoEnvio(null, erro));
     return res.status(502).json({ erro: "Falha ao ler o banco (condomínios ou inscrições)." });
+  }
+}
+
+// Se não der para anotar, o lembrete continua valendo (só registra no log).
+async function anotar(banco, registro) {
+  try {
+    await banco.registrarEnvio(registro);
+  } catch (erro) {
+    console.error("Não foi possível anotar o envio do lembrete:", erro.message);
   }
 }

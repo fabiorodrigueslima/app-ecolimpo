@@ -37,5 +37,15 @@ export function criarBancoServidor({ url, chave, buscar = globalThis.fetch }) {
     return (await resposta.json()).map((c) => ({ ...c, dias: (c.dias ?? []).map(Number) }));
   }
 
-  return { buscarInscricoes, apagarInscricao, buscarCondominios };
+  // Anota o que o despertador fez (o painel mostra o último registro).
+  async function registrarEnvio(registro) {
+    const resposta = await buscar(`${url.replace(/\/+$/, "")}/rest/v1/envios_lembrete`, {
+      method: "POST",
+      headers: { ...cabecalhos(chave), Prefer: "return=minimal" },
+      body: JSON.stringify(registro),
+    });
+    if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao registrar o envio`);
+  }
+
+  return { buscarInscricoes, apagarInscricao, buscarCondominios, registrarEnvio };
 }

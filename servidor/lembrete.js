@@ -30,6 +30,28 @@ export function pedidoAutorizado(cabecalho, segredo) {
   return timingSafeEqual(resumo(cabecalho), resumo(`Bearer ${segredo}`));
 }
 
+// Resumo do envio -> linha da tabela envios_lembrete (SQL 008).
+export function registroDoEnvio(resumo, erro = null) {
+  if (erro || !resumo) {
+    return {
+      condominios: [],
+      inscricoes: 0,
+      enviados: 0,
+      removidos: 0,
+      falhas: 0,
+      erro: String(erro?.message ?? "erro desconhecido").slice(0, 300),
+    };
+  }
+  return {
+    condominios: resumo.condominios,
+    inscricoes: resumo.inscricoes,
+    enviados: resumo.enviados,
+    removidos: resumo.removidos,
+    falhas: resumo.falhas,
+    erro: null,
+  };
+}
+
 export function mensagemDoLembrete(condominio) {
   return {
     titulo: "Hoje tem coleta seletiva",
