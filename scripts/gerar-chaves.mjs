@@ -6,7 +6,7 @@
 
 import { existsSync, readFileSync, appendFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import webpush from "web-push";
+import * as webpush from "web-push";
 
 const ARQUIVO = ".env.local";
 const atual = existsSync(ARQUIVO) ? readFileSync(ARQUIVO, "utf8") : "";
