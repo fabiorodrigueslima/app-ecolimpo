@@ -5,6 +5,7 @@ import { buscarMateriais, RESPOSTAS } from "../lib/busca.js";
 import { AvisoPreencher, Cabecalho } from "../components/Comuns.jsx";
 import { IconeBusca } from "../components/Icones.jsx";
 import { VoceSabia, Depoimento } from "../components/VoceSabia.jsx";
+import GuiaSeparacao from "../components/GuiaSeparacao.jsx";
 
 export default function Recicla() {
   const [termo, setTermo] = useState("");
@@ -19,8 +20,11 @@ export default function Recicla() {
       <Depoimento />
 
       <h2 className="titulo-secao">O que a cooperativa recicla e o que não recicla</h2>
+      <GuiaSeparacao />
+
+      <h2 className="titulo-secao">Dúvida sobre um item?</h2>
       <p className="cabecalho-sub">Digite o nome do material, por exemplo: caixa de pizza.</p>
-      {temExemplo && <AvisoPreencher>A lista oficial da cooperativa ainda vai ser cadastrada.</AvisoPreencher>}
+      {temExemplo && <AvisoPreencher>A lista detalhada da busca ainda vai ser cadastrada.</AvisoPreencher>}
 
       <label className="campo-busca">
         <IconeBusca tamanho={20} />

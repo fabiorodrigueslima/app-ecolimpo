@@ -297,6 +297,25 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .titulo-secao { margin: 8px 0 0; font-size: 1.25rem; }
 .titulo-secao + .cabecalho-sub { margin: -8px 0 0; }
 
+/* ===== Guia de separação (Recicláveis x Orgânicos e rejeitos) ===== */
+.guia-separacao { --guia-laranja: #c2541c; --guia-laranja-escuro: #9a3f10; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.guia-coluna { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius); background: #fff; border: 2px solid; box-shadow: var(--shadow-sm); }
+.guia-sim { border-color: var(--brand-green); }
+.guia-nao { border-color: var(--guia-laranja); }
+.guia-topo { display: flex; align-items: center; gap: 8px; padding: 12px 10px; color: #fff; }
+.guia-sim .guia-topo { background: var(--brand-green); }
+.guia-nao .guia-topo { background: var(--guia-laranja-escuro); }
+.guia-topo-icone { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+.guia-topo h3 { margin: 0; color: #fff; font-size: 0.98rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.02em; }
+.guia-topo p { margin: 3px 0 0; font-size: 0.74rem; line-height: 1.25; opacity: 0.95; }
+.guia-itens { list-style: none; margin: 0; padding: 6px 8px 10px; display: grid; gap: 2px; }
+.guia-itens li { display: flex; align-items: center; gap: 8px; min-height: 40px; font-size: 0.9rem; font-weight: 700; line-height: 1.2; color: var(--brand-blue-dark); }
+.guia-itens li + li { border-top: 1px solid var(--surface-soft); }
+.guia-item-icone { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; }
+.guia-sim .guia-item-icone { background: #e2f1e6; color: var(--brand-green-dark); }
+.guia-nao .guia-item-icone { background: #fbe9df; color: var(--guia-laranja-escuro); }
+@media (max-width: 340px) { .guia-separacao { grid-template-columns: 1fr; } }
+
 /* ===== Lembrete ===== */
 .cartao-lembrete { display: grid; gap: 12px; }
 .cartao-lembrete h2 { margin: 0; }
