@@ -1,9 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { lerCondominioSalvo, salvarCondominio } from "./lib/armazenamento.js";
 import { atualizarCondominioDoLembrete } from "./lib/lembrete.js";
-import { CondominiosContexto, useCarregarCondominios } from "./lib/condominios.js";
-import { lerCondominioDoLink } from "./lib/link.js";
+import { CondominioContexto, useCondominioMorador } from "./lib/condominios.js";
 import Layout from "./components/Layout.jsx";
 import EscolherCondominio from "./pages/EscolherCondominio.jsx";
 import Inicio from "./pages/Inicio.jsx";
@@ -29,9 +27,7 @@ function Aguarde({ texto = "Carregando…" }) {
 
 export default function App() {
   const { pathname, search } = useLocation();
-  const condominios = useCarregarCondominios();
-  const [idSalvo, setIdSalvo] = useState(lerCondominioSalvo);
-  const condominio = condominios.lista.find((c) => c.id === idSalvo) ?? null;
+  const { condominio, carregando, escolher: guardarEscolha } = useCondominioMorador();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -45,50 +41,32 @@ export default function App() {
     );
   }
 
+  // Cartaz: só para a equipe (a página confere o login do painel).
   if (pathname === "/cartaz") {
     return (
-      <CondominiosContexto.Provider value={condominios.lista}>
-        <Suspense fallback={<Aguarde />}>
-          <Cartaz />
-        </Suspense>
-      </CondominiosContexto.Provider>
+      <Suspense fallback={<Aguarde />}>
+        <Cartaz />
+      </Suspense>
     );
   }
 
-  function escolher(id) {
-    salvarCondominio(id);
-    setIdSalvo(id);
-    atualizarCondominioDoLembrete(id);
+  function escolher(novo) {
+    guardarEscolha(novo);
+    atualizarCondominioDoLembrete(novo.id);
   }
 
   let conteudo;
-  if (condominios.carregando && condominios.lista.length === 0) {
+  if (carregando && !condominio) {
     conteudo = (
       <Layout semMenu>
         <Aguarde />
       </Layout>
     );
-  } else if (condominios.erro) {
-    conteudo = (
-      <Layout semMenu>
-        <div className="pagina obrigado">
-          <h1>Sem conexão</h1>
-          <p>Não foi possível carregar a lista de condomínios. Confira a internet.</p>
-          <button type="button" className="botao botao-primario botao-largo" onClick={condominios.tentarDeNovo}>
-            Tentar de novo
-          </button>
-        </div>
-      </Layout>
-    );
   } else if (!condominio && pathname !== "/privacidade") {
-    // Primeira vez (ou condomínio saiu da lista): escolher antes de tudo.
+    // Primeira vez (ou o condomínio saiu do app): escolher antes de tudo.
     conteudo = (
       <Layout semMenu>
-        <EscolherCondominio
-          aoEscolher={escolher}
-          primeiraVez
-          sugerido={lerCondominioDoLink(search, condominios.lista.map((c) => c.id))}
-        />
+        <EscolherCondominio aoEscolher={escolher} primeiraVez idDoLink={new URLSearchParams(search).get("c")} />
       </Layout>
     );
   } else {
@@ -109,5 +87,5 @@ export default function App() {
     );
   }
 
-  return <CondominiosContexto.Provider value={condominios.lista}>{conteudo}</CondominiosContexto.Provider>;
+  return <CondominioContexto.Provider value={condominio}>{conteudo}</CondominioContexto.Provider>;
 }

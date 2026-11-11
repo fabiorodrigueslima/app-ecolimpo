@@ -47,6 +47,9 @@ export function criarCliente({ url, chave, buscar = globalThis.fetch, limiteMs =
     inserir: (tabela, dados) => postar(tabela, dados),
     funcao: (nome, argumentos) => postar(`rpc/${nome}`, argumentos),
     ler: (caminho) => requisitar({ url, chave, buscar, limiteMs }, "GET", `rest/v1/${caminho}`),
+    // Chama uma função do banco e devolve a resposta dela ({ ok, status, dados }).
+    consultar: (nome, argumentos) =>
+      requisitar({ url, chave, buscar, limiteMs }, "POST", `rest/v1/rpc/${nome}`, { corpo: argumentos }),
   };
 }
 

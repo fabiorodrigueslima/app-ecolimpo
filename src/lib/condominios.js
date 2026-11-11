@@ -1,19 +1,28 @@
-// De onde vem a lista de condomínios do app:
-//   * Com banco (Supabase configurado): da tabela "condominios", editada pelo
-//     painel. Fica uma cópia no celular para abrir sem internet.
-//   * Sem banco (modo de teste): do arquivo src/data/condominios.js.
+// Condomínio do morador.
+// A lista de condomínios é PRIVADA (sigilo comercial e segurança):
+//   * O app nunca baixa a lista inteira.
+//   * O morador chega pelo QR Code do cartaz (o condomínio já vem marcado) ou
+//     digita pelo menos 4 letras do nome; o banco devolve no máximo 3.
+//   * O celular guarda só o condomínio escolhido (para abrir sem internet).
+// Sem banco (modo de teste), a busca usa o arquivo src/data/condominios.js
+// com as mesmas regras.
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { condominios as doArquivo } from "../data/condominios.js";
 import { banco, BANCO_LIGADO } from "./config.js";
+import { normalizar } from "./busca.js";
+import { lerCondominioSalvo, salvarCondominio } from "./armazenamento.js";
 
-const CHAVE_COPIA = "ecolimpo:condominios";
-export const CAMINHO_CONDOMINIOS = "condominios?select=id,nome,regiao,dias,horario,piloto&ativo=is.true&order=nome";
+export const MINIMO_LETRAS = 4;
+export const MAXIMO_RESULTADOS = 3;
 
-export const CondominiosContexto = createContext([]);
+const CHAVE_DADOS = "ecolimpo:condominio-dados";
+const CHAVE_LISTA_ANTIGA = "ecolimpo:condominios"; // versões antigas guardavam a lista inteira
 
-export function useCondominios() {
-  return useContext(CondominiosContexto);
+export const CondominioContexto = createContext(null);
+
+export function useCondominioAtual() {
+  return useContext(CondominioContexto);
 }
 
 // Linha do banco -> formato usado no app.
@@ -25,62 +34,95 @@ export function normalizarCondominio(linha) {
     dias: (linha.dias ?? []).map(Number).sort((a, b) => a - b),
     horario: linha.horario,
     piloto: Boolean(linha.piloto),
+    ...(linha.exemplo ? { exemplo: true } : {}),
   };
 }
 
-function lerCopia() {
+// ---------- Regras da busca (testadas em tests/condominios.test.mjs) ----------
+
+export function termoValido(texto) {
+  return normalizar(texto).length >= MINIMO_LETRAS;
+}
+
+// Mesmas regras do banco (SQL 010): pelo menos 4 letras, no máximo 3 resultados.
+export function filtrarCondominios(lista, texto) {
+  if (!termoValido(texto)) return [];
+  const termo = normalizar(texto);
+  return lista
+    .filter((c) => normalizar(c.nome).includes(termo))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
+    .slice(0, MAXIMO_RESULTADOS);
+}
+
+// ---------- Perguntas ao banco ----------
+
+export async function buscarCondominios(texto) {
+  if (!termoValido(texto)) return { ok: true, lista: [] };
+  if (!BANCO_LIGADO) return { ok: true, lista: filtrarCondominios(doArquivo, texto).map(normalizarCondominio) };
+  const r = await banco.consultar("buscar_condominios", { p_texto: texto });
+  return r.ok && Array.isArray(r.dados) ? { ok: true, lista: r.dados.map(normalizarCondominio) } : { ok: false, lista: [] };
+}
+
+export async function condominioPorId(id) {
+  if (!id) return { ok: true, condominio: null };
+  if (!BANCO_LIGADO) {
+    const achado = doArquivo.find((c) => c.id === id);
+    return { ok: true, condominio: achado ? normalizarCondominio(achado) : null };
+  }
+  const r = await banco.consultar("condominio_por_id", { p_id: id });
+  if (!r.ok || !Array.isArray(r.dados)) return { ok: false, condominio: null };
+  return { ok: true, condominio: r.dados[0] ? normalizarCondominio(r.dados[0]) : null };
+}
+
+// ---------- O que fica guardado no celular ----------
+
+function lerGuardado() {
   try {
-    const texto = localStorage.getItem(CHAVE_COPIA);
+    localStorage.removeItem(CHAVE_LISTA_ANTIGA);
+    const texto = localStorage.getItem(CHAVE_DADOS);
     return texto ? JSON.parse(texto) : null;
   } catch {
     return null;
   }
 }
 
-function salvarCopia(lista) {
+function guardar(condominio) {
+  salvarCondominio(condominio?.id ?? null);
   try {
-    localStorage.setItem(CHAVE_COPIA, JSON.stringify(lista));
+    if (condominio) localStorage.setItem(CHAVE_DADOS, JSON.stringify(condominio));
+    else localStorage.removeItem(CHAVE_DADOS);
   } catch {
-    // sem armazenamento: segue sem cópia
+    // sem armazenamento: vale só enquanto o app estiver aberto
   }
 }
 
-// Busca no banco; devolve a lista ou null (sem internet / erro).
-async function buscarLista() {
-  const r = await banco.ler(CAMINHO_CONDOMINIOS);
-  return r.ok && Array.isArray(r.dados) ? r.dados.map(normalizarCondominio) : null;
-}
-
-export function useCarregarCondominios() {
+// Condomínio do morador: usa o guardado na hora e confere no banco se mudou
+// (dia/horário) ou se saiu do app (aí pede para escolher de novo).
+export function useCondominioMorador() {
+  const [idInicial] = useState(() => lerGuardado()?.id ?? lerCondominioSalvo());
   const [estado, setEstado] = useState(() => {
-    if (!BANCO_LIGADO) return { lista: doArquivo, carregando: false, erro: false };
-    const copia = lerCopia();
-    return { lista: copia ?? [], carregando: !copia, erro: false };
+    const guardado = lerGuardado();
+    return { condominio: guardado, carregando: !guardado && Boolean(idInicial) };
   });
 
-  const aplicar = useCallback((lista) => {
-    if (lista) {
-      salvarCopia(lista);
-      setEstado({ lista, carregando: false, erro: false });
-    } else {
-      setEstado((e) => ({ ...e, carregando: false, erro: e.lista.length === 0 }));
-    }
-  }, []);
-
   useEffect(() => {
-    // Busca a lista atualizada ao abrir o app (a cópia aparece enquanto isso).
-    if (!BANCO_LIGADO) return;
+    if (!idInicial) return;
     let ativo = true;
-    buscarLista().then((lista) => ativo && aplicar(lista));
+    condominioPorId(idInicial).then((r) => {
+      if (!ativo) return;
+      if (!r.ok) return setEstado((e) => ({ ...e, carregando: false })); // sem internet: segue com o guardado
+      guardar(r.condominio);
+      setEstado({ condominio: r.condominio, carregando: false });
+    });
     return () => {
       ativo = false;
     };
-  }, [aplicar]);
+  }, [idInicial]);
 
-  const tentarDeNovo = useCallback(() => {
-    setEstado((e) => ({ ...e, carregando: true, erro: false }));
-    buscarLista().then(aplicar);
-  }, [aplicar]);
+  function escolher(condominio) {
+    guardar(condominio);
+    setEstado({ condominio, carregando: false });
+  }
 
-  return { ...estado, tentarDeNovo };
+  return { ...estado, escolher };
 }
