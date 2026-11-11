@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { TIPOS_MENSAGEM, LIMITES, validarMensagem, montarMensagem, tipoDoLink } from "../lib/formularios.js";
-import { Cabecalho, CamposOpcionais } from "../components/Comuns.jsx";
+import { Cabecalho, CamposOpcionais, AvisoPrivacidade } from "../components/Comuns.jsx";
 import { CampoCondominio, Obrigado, BotaoEnviar } from "../components/Formulario.jsx";
 import { useFormulario } from "../lib/useFormulario.js";
 
@@ -67,7 +67,7 @@ export default function Mensagem({ condominio }) {
       </label>
 
       <CamposOpcionais dados={dados} mudar={mudar} erros={erros} />
-      <p className="dica">Não escreva CPF, telefone ou endereço completo na mensagem.</p>
+      <AvisoPrivacidade />
       <BotaoEnviar estado={estado} />
     </form>
   );

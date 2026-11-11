@@ -12,7 +12,7 @@ import {
 } from "../lib/formularios.js";
 import { ESCALA, NAO_SEI, PERGUNTA_NPS, PERGUNTA_HABITO, HABITOS, PERGUNTA_MELHORAR } from "../data/pesquisa.js";
 import { lerMesDaPesquisa, salvarMesDaPesquisa } from "../lib/armazenamento.js";
-import { CamposOpcionais } from "../components/Comuns.jsx";
+import { CamposOpcionais, AvisoPrivacidade } from "../components/Comuns.jsx";
 import { CampoCondominio, Obrigado, BotaoEnviar } from "../components/Formulario.jsx";
 import { IconeVoltar, IconeEstrela } from "../components/Icones.jsx";
 import { useFormulario } from "../lib/useFormulario.js";
@@ -256,6 +256,7 @@ export default function Pesquisa({ condominio }) {
             {erros.melhorar && <span className="erro">{erros.melhorar}</span>}
           </label>
           <CamposOpcionais dados={dados} mudar={mudar} erros={erros} />
+          <AvisoPrivacidade />
         </section>
       )}
 

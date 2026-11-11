@@ -24,6 +24,19 @@ export function Cabecalho({ titulo, subtitulo, voltar }) {
   );
 }
 
+// Aviso da LGPD na hora de enviar (abre a política em outra aba para não perder o que foi preenchido).
+export function AvisoPrivacidade() {
+  return (
+    <p className="aviso-privacidade">
+      Ao enviar, você concorda com a{" "}
+      <a href="/privacidade" target="_blank" rel="noopener">
+        Política de privacidade
+      </a>
+      . Não escreva CPF, telefone ou endereço completo.
+    </p>
+  );
+}
+
 // Campos opcionais de identificação (nome e apartamento).
 export function CamposOpcionais({ dados, mudar, erros }) {
   return (

@@ -364,6 +364,9 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .pesquisa-navegacao .erro-bloco { flex-basis: 100%; }
 @media (max-width: 360px) { .escala-rotulo { font-size: 0.6rem; } .escala-emoji { font-size: 1.6rem; } }
 
+.aviso-privacidade { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+.aviso-privacidade a { font-weight: 700; }
+
 /* ===== Lembrete ===== */
 .cartao-lembrete { display: grid; gap: 12px; }
 .cartao-lembrete h2 { margin: 0; }
