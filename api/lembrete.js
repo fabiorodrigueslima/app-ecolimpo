@@ -9,7 +9,7 @@
 //   VAPID_PRIVATE_KEY       chave privada do lembrete
 //   LEMBRETE_SEGREDO        senha que o despertador manda para poder chamar
 
-import webpush from "web-push";
+import * as webpush from "web-push";
 import { contatos } from "../src/data/contatos.js";
 import { criarBancoServidor } from "../servidor/banco.js";
 import { enviarLembretesDoDia, pedidoAutorizado, registroDoEnvio } from "../servidor/lembrete.js";
@@ -28,8 +28,16 @@ export default async function handler(req, res) {
     return res.status(500).json({ erro: "Faltam variáveis de ambiente.", faltando });
   }
 
-  webpush.setVapidDetails(`mailto:${contatos.email}`, process.env.VITE_VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
   const banco = criarBancoServidor({ url: process.env.VITE_SUPABASE_URL, chave: process.env.SUPABASE_SECRET_KEY });
+
+  // Chave do lembrete com formato errado: anota o erro (o painel avisa) em vez de cair.
+  try {
+    webpush.setVapidDetails(`mailto:${contatos.email}`, process.env.VITE_VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
+  } catch (erro) {
+    console.error("Chave do lembrete (VAPID) inválida:", erro.message);
+    await anotar(banco, registroDoEnvio(null, new Error("Chave do lembrete (VAPID) com formato errado na Vercel.")));
+    return res.status(500).json({ erro: "Chave do lembrete com formato errado." });
+  }
 
   try {
     const resumo = await enviarLembretesDoDia({

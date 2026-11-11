@@ -221,3 +221,31 @@ test("app chama as funções do banco pelo caminho rpc/", async () => {
   assert.deepEqual(await banco.funcao("cancelar_inscricao", { p_endpoint: "https://e" }), { ok: true });
   assert.equal(endereco, "https://x.supabase.co/rest/v1/rpc/cancelar_inscricao");
 });
+
+test("api/lembrete: chave do lembrete errada vira erro claro e fica anotada (não derruba o servidor)", async () => {
+  const antes = { ...process.env };
+  const anotados = [];
+  const fetchOriginal = globalThis.fetch;
+  globalThis.fetch = async (endereco, opcoes = {}) => {
+    if (String(endereco).includes("envios_lembrete")) anotados.push(JSON.parse(opcoes.body));
+    return { ok: true, json: async () => [], text: async () => "" };
+  };
+  try {
+    Object.assign(process.env, {
+      LEMBRETE_SEGREDO: "senha-certa",
+      VITE_SUPABASE_URL: "https://x.supabase.co",
+      SUPABASE_SECRET_KEY: "sb_secret_teste",
+      VITE_VAPID_PUBLIC_KEY: "chave-publica-quebrada",
+      VAPID_PRIVATE_KEY: "chave-privada-quebrada",
+    });
+    const res = respostaFalsa();
+    await handler({ method: "POST", headers: { authorization: "Bearer senha-certa" } }, res);
+    assert.equal(res.codigo, 500);
+    assert.match(res.corpo.erro, /formato errado/);
+    assert.equal(anotados.length, 1);
+    assert.match(anotados[0].erro, /VAPID/);
+  } finally {
+    process.env = antes;
+    globalThis.fetch = fetchOriginal;
+  }
+});
