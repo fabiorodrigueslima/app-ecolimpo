@@ -3,7 +3,7 @@
 Passo a passo para testar o app com os 3 condomínios antes de levar para todos.
 Cada item com 🔒 precisa da sua autorização antes de ser feito.
 
-**Situação:** ✅ APROVADO em 12/11/2026. Custo zero para a cooperativa; o app é do desenvolvedor e a Ecolimpo tem uso gratuito (formalizar por escrito).
+**Situação:** aprovado pelo diretor responsável pelo app em 12/11/2026; **aguardando a autorização da Presidência e da Tesouraria**. Custo zero para a cooperativa; o app é do desenvolvedor e a Ecolimpo tem uso gratuito (formalizar por escrito).
 **Condomínios do piloto:** os 3 atendidos hoje — Condomínio Parque Ecológico do Mirante,
 Condomínio Mônaco e Condomínio San Francisco II.
 **Duração do piloto:** 4 semanas, contadas a partir do dia em que os cartazes forem colados.
@@ -24,7 +24,7 @@ Condomínio Mônaco e Condomínio San Francisco II.
 
 ## 2. Antes de imprimir
 
-- [x] **Aprovação da Diretoria** (12/11/2026).
+- [ ] **Autorização da Presidência e da Tesouraria** (mensagem enviada em 12/11/2026).
 - [x] Escolher os condomínios do piloto: os 3 condomínios (12/11/2026).
 - [ ] Marcar **"Faz parte do teste piloto"** nos 3, no painel (é só uma etiqueta; não muda nada para o morador).
 - [x] San Francisco II: coleta pela manhã, **10h** (pedido do síndico; SQL 015, 12/11/2026).
