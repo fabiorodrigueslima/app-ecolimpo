@@ -11,7 +11,7 @@
 //   dias:    dias da coleta, por número: 0 = domingo, 1 = segunda,
 //            2 = terça, 3 = quarta, 4 = quinta, 5 = sexta, 6 = sábado
 //   diasPoda: dias da coleta de podas (opcional; mesmo jeito dos "dias")
-//   horario: "09:00" (manhã) ou "14:00" (tarde)
+//   horario: "09:00" ou "10:00" (manhã) ou "14:00" (tarde)
 //   piloto:  true se o condomínio faz parte do teste piloto
 //   exemplo: apague esta linha quando o dado for real
 // =====================================================================

@@ -144,7 +144,8 @@ test("apelido (id) gerado a partir do nome", () => {
 
 test("cadastro de condomínio: confere os campos", () => {
   assert.equal(validarCondominio({ nome: "Jardins", dias: [2, 5], horario: "09:00" }).ok, true);
-  const ruim = validarCondominio({ nome: " ", dias: [], horario: "10:00" });
+  const ruim = validarCondominio({ nome: " ", dias: [], horario: "11:00" });
+  assert.equal(validarCondominio({ nome: "San Francisco II", dias: [3], horario: "10:00" }).ok, true);
   assert.deepEqual(Object.keys(ruim.erros).sort(), ["dias", "horario", "nome"]);
   assert.ok(validarCondominio({ nome: "X", dias: [7], horario: "14:00" }).erros.dias);
 

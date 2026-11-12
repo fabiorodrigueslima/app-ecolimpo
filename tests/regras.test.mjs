@@ -196,3 +196,17 @@ test("coleta de podas: só no condomínio que tem dia de poda", () => {
   );
   assert.equal(conferirCondominios([{ ...mirante, diasPoda: [8] }]).length, 1);
 });
+
+test("horário 10h: aceito no app e no banco (SQL 015), com o mesmo texto", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { HORARIOS_VALIDOS, periodoDoHorario } = await import("../src/lib/coleta.js");
+  const sql = readFileSync(new URL("../supabase/015_horario_10h.sql", import.meta.url), "utf8");
+  const doBanco = sql.match(/check \(horario in \(([^)]*)\)\)/)[1].match(/\d\d:\d\d/g);
+  assert.deepEqual(doBanco, HORARIOS_VALIDOS);
+  assert.ok(HORARIOS_VALIDOS.includes("10:00"));
+  assert.equal(formatarHorario("10:00"), "10h");
+  assert.equal(periodoDoHorario("10:00"), "manhã");
+  assert.equal(textoLembrete("10:00"), "Não esqueça de colocar os recicláveis para fora hoje! A coleta seletiva passa às 10h.");
+  assert.deepEqual(conferirCondominios([{ id: "sf", nome: "SF", dias: [3], horario: "10:00" }]), []);
+  assert.equal(conferirCondominios([{ id: "sf", nome: "SF", dias: [3], horario: "11:00" }]).length, 1);
+});

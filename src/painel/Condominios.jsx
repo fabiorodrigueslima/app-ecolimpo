@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NOMES_DIAS, descreverDias, formatarHorario } from "../lib/coleta.js";
+import { NOMES_DIAS, HORARIOS_VALIDOS, descreverDias, formatarHorario, periodoDoHorario } from "../lib/coleta.js";
 import { gerarId, validarCondominio, situacaoLembrete, mensagemWhatsApp, linkWhatsApp } from "./regras.js";
 
 // Caixa com o texto pronto para o síndico mandar no WhatsApp dos moradores.
@@ -121,10 +121,7 @@ function Formulario({ inicial, novo, aoSalvar, aoCancelar }) {
       <fieldset className="grupo">
         <legend>Horário de entrada da coleta</legend>
         <div className="chips">
-          {[
-            ["09:00", "9h (manhã)"],
-            ["14:00", "14h (tarde)"],
-          ].map(([valor, rotulo]) => (
+          {HORARIOS_VALIDOS.map((valor) => [valor, `${formatarHorario(valor)} (${periodoDoHorario(valor)})`]).map(([valor, rotulo]) => (
             <label key={valor} className={`chip ${dados.horario === valor ? "chip-marcado" : ""}`}>
               <input
                 type="radio"

@@ -2,7 +2,7 @@
 // e o texto do lembrete. Tudo calculado no horário de Brasília.
 
 export const FUSO = "America/Sao_Paulo";
-export const HORARIOS_VALIDOS = ["09:00", "14:00"];
+export const HORARIOS_VALIDOS = ["09:00", "10:00", "14:00"]; // mudar junto com o SQL 015
 export const NOMES_DIAS = [
   "domingo",
   "segunda-feira",
@@ -167,7 +167,7 @@ export function conferirCondominios(lista) {
       erros.push(`${onde}: "dias" deve ter números de 0 (domingo) a 6 (sábado).`);
     if (c.diasPoda !== undefined && (!Array.isArray(c.diasPoda) || c.diasPoda.some((d) => !Number.isInteger(d) || d < 0 || d > 6)))
       erros.push(`${onde}: "diasPoda" deve ter números de 0 (domingo) a 6 (sábado).`);
-    if (!HORARIOS_VALIDOS.includes(c.horario)) erros.push(`${onde}: "horario" deve ser "09:00" ou "14:00".`);
+    if (!HORARIOS_VALIDOS.includes(c.horario)) erros.push(`${onde}: "horario" deve ser "09:00", "10:00" ou "14:00".`);
   });
   return erros;
 }

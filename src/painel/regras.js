@@ -196,7 +196,7 @@ export function validarCondominio(dados) {
   else if (dados.dias.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) erros.dias = "Dia inválido.";
   const podas = dados.dias_poda ?? [];
   if (!Array.isArray(podas) || podas.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) erros.dias_poda = "Dia inválido.";
-  if (!HORARIOS_VALIDOS.includes(dados.horario)) erros.horario = "Escolha 9h ou 14h.";
+  if (!HORARIOS_VALIDOS.includes(dados.horario)) erros.horario = "Escolha o horário.";
   return { ok: Object.keys(erros).length === 0, erros };
 }
 

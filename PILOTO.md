@@ -26,7 +26,7 @@ Condomínio Mônaco e Condomínio San Francisco II.
 - [ ] **Aprovação da Diretoria** (apresentar o projeto e o slide de lançamento).
 - [x] Escolher os condomínios do piloto: os 3 condomínios (12/11/2026).
 - [ ] Depois da aprovação: marcar **"Faz parte do teste piloto"** nos 3, no painel (é só uma etiqueta; não muda nada para o morador).
-- [ ] Conferir **dias e horário** de cada condomínio (San Francisco II: 9h ou 14h?).
+- [x] San Francisco II: coleta pela manhã, **10h** (pedido do síndico; SQL 015, 12/11/2026).
 - [x] Parque do Mirante: segunda = coleta de **podas**, terça e quinta = recicláveis, às 14h (SQL 014, 12/11/2026).
 - [x] Região corrigida no painel ("TORORÓ - JARDIM BOTÂNICO").
 - [ ] Testar num **iPhone**: adicionar à tela inicial, ligar o lembrete, receber o aviso.
