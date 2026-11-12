@@ -1,7 +1,8 @@
 // Regras do painel (sem tela), testadas em tests/painel.test.mjs.
 
 import { normalizar } from "../lib/busca.js";
-import { HORARIOS_VALIDOS } from "../lib/coleta.js";
+import { HORARIOS_VALIDOS, descreverDias, formatarHorario } from "../lib/coleta.js";
+import { URL_APP, linkDoCondominio } from "../lib/link.js";
 import { TIPOS_MENSAGEM, TEMAS_PESQUISA } from "../lib/formularios.js";
 import { HABITOS } from "../data/pesquisa.js";
 
@@ -207,6 +208,37 @@ export function linhaDoCondominio(dados) {
     piloto: Boolean(dados.piloto),
     ativo: Boolean(dados.ativo),
   };
+}
+
+// ---------- Mensagem para o WhatsApp do condomínio ----------
+
+// Texto pronto para o síndico mandar no grupo dos moradores.
+// Usa só os dados do banco (nome, dias, horário) e o link com o condomínio já marcado.
+export function mensagemWhatsApp(condominio, base = URL_APP) {
+  const dias = descreverDias(condominio.dias ?? []);
+  return [
+    "♻️ *Coleta seletiva — Cooperativa Ecolimpo*",
+    "",
+    `Olá, moradores do *${condominio.nome.trim()}*!`,
+    "",
+    `A coleta dos recicláveis é toda *${dias}*, às *${formatarHorario(condominio.horario)}*.`,
+    "",
+    "Agora a cooperativa tem um app gratuito. Nele você pode:",
+    "• ver o dia da próxima coleta;",
+    "• receber um aviso no celular no dia da coleta;",
+    "• tirar dúvidas sobre o que pode ser reciclado;",
+    "• mandar sugestões e avaliar a coleta.",
+    "",
+    "É só abrir o link (o nosso condomínio já vem marcado):",
+    linkDoCondominio(condominio.id, base),
+    "",
+    "Dica: no celular, use “Adicionar à tela inicial” para abrir como um app.",
+  ].join("\n");
+}
+
+// Link que abre o WhatsApp com o texto pronto (a pessoa escolhe para quem mandar).
+export function linkWhatsApp(texto) {
+  return `https://wa.me/?text=${encodeURIComponent(texto)}`;
 }
 
 // ---------- Lembrete das 6h30 (registro do despertador) ----------

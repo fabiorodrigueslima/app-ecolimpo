@@ -1,6 +1,49 @@
 import { useEffect, useState } from "react";
 import { NOMES_DIAS, descreverDias, formatarHorario } from "../lib/coleta.js";
-import { gerarId, validarCondominio, situacaoLembrete } from "./regras.js";
+import { gerarId, validarCondominio, situacaoLembrete, mensagemWhatsApp, linkWhatsApp } from "./regras.js";
+
+// Caixa com o texto pronto para o síndico mandar no WhatsApp dos moradores.
+function MensagemWhatsApp({ condominio, aoFechar }) {
+  const texto = mensagemWhatsApp(condominio);
+  const [copiado, setCopiado] = useState("");
+
+  async function copiar(e) {
+    const caixa = e.currentTarget.closest(".mensagem-whatsapp").querySelector("textarea");
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado("Texto copiado. Agora é só colar no WhatsApp.");
+    } catch {
+      caixa.select();
+      setCopiado("Não deu para copiar sozinho: o texto ficou selecionado, use Copiar do celular/computador.");
+    }
+  }
+
+  return (
+    <div className="mensagem-whatsapp">
+      <h3>Mensagem para o WhatsApp</h3>
+      <p className="dica">
+        Mande para o síndico divulgar no grupo dos moradores. Confira o texto antes de enviar.
+      </p>
+      <textarea readOnly value={texto} rows={14} aria-label="Texto da mensagem" />
+      {copiado && (
+        <p className="aviso-ok" role="status">
+          {copiado}
+        </p>
+      )}
+      <div className="botoes">
+        <button type="button" className="botao botao-primario" onClick={copiar}>
+          Copiar texto
+        </button>
+        <a className="botao botao-secundario" href={linkWhatsApp(texto)} target="_blank" rel="noreferrer">
+          Abrir no WhatsApp
+        </a>
+        <button type="button" className="botao botao-secundario" onClick={aoFechar}>
+          Fechar
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const VAZIO = { nome: "", regiao: "", dias: [], horario: "", piloto: false, ativo: true };
 
@@ -113,6 +156,7 @@ export default function Condominios({ api }) {
   const [estado, setEstado] = useState("carregando");
   const [editando, setEditando] = useState(null); // null | "novo" | condomínio
   const [aviso, setAviso] = useState("");
+  const [mensagemDe, setMensagemDe] = useState(null); // id do condomínio com a mensagem aberta
   const [versao, setVersao] = useState(0); // muda para recarregar
 
   useEffect(() => {
@@ -230,6 +274,16 @@ export default function Condominios({ api }) {
                   Cartaz
                 </a>
               )}
+              {c.ativo && (
+                <button
+                  type="button"
+                  className="botao botao-secundario"
+                  aria-expanded={mensagemDe === c.id}
+                  onClick={() => setMensagemDe(mensagemDe === c.id ? null : c.id)}
+                >
+                  WhatsApp
+                </button>
+              )}
               <button
                 type="button"
                 className="botao botao-secundario"
@@ -241,6 +295,9 @@ export default function Condominios({ api }) {
                 Editar
               </button>
             </div>
+            {mensagemDe === c.id && c.ativo && (
+              <MensagemWhatsApp key={`${c.id}-${versao}`} condominio={c} aoFechar={() => setMensagemDe(null)} />
+            )}
           </li>
         ))}
       </ul>

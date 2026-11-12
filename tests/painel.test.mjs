@@ -18,6 +18,8 @@ import {
   gerarId,
   validarCondominio,
   linhaDoCondominio,
+  mensagemWhatsApp,
+  linkWhatsApp,
 } from "../src/painel/regras.js";
 import { normalizarCondominio } from "../src/lib/condominios.js";
 import { criarBancoServidor } from "../servidor/banco.js";
@@ -154,6 +156,21 @@ test("cadastro de condomínio: confere os campos", () => {
     piloto: true,
     ativo: true,
   });
+});
+
+test("mensagem para o WhatsApp usa os dados do condomínio e o link dele", () => {
+  const texto = mensagemWhatsApp(
+    { id: "condominio-prive-monaco", nome: " Condomínio Mônaco ", dias: [4, 2], horario: "09:00" },
+    "https://app.exemplo.com.br",
+  );
+  assert.match(texto, /moradores do \*Condomínio Mônaco\*!/);
+  assert.match(texto, /toda \*terça-feira e quinta-feira\*, às \*9h\*\./);
+  assert.match(texto, /\nhttps:\/\/app\.exemplo\.com\.br\/\?c=condominio-prive-monaco\n/);
+  assert.doesNotMatch(texto, /A PREENCHER|undefined|null/);
+
+  const link = linkWhatsApp(texto);
+  assert.ok(link.startsWith("https://wa.me/?text="));
+  assert.equal(decodeURIComponent(link.slice("https://wa.me/?text=".length)), texto);
 });
 
 test("condomínio vindo do banco fica no formato do app", () => {

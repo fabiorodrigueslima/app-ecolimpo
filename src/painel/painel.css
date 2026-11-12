@@ -100,6 +100,9 @@
 .condominio p:first-letter { text-transform: uppercase; }
 .condominio-inativo { opacity: 0.6; }
 .condominio .etiqueta:not(.etiqueta-piloto) { margin-left: 8px; }
+.mensagem-whatsapp { flex-basis: 100%; display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mensagem-whatsapp h3 { margin: 0; font-size: 1rem; }
+.mensagem-whatsapp textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 0.95rem; line-height: 1.4; resize: vertical; }
 .botoes { display: flex; flex-wrap: wrap; gap: 10px; }
 .botoes .botao { flex: 1; }
 .mfa-qr { display: grid; justify-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
