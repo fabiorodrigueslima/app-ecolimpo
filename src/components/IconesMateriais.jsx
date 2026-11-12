@@ -119,6 +119,31 @@ const DESENHOS = {
       <path d="m10 14 2 2-1 2 2 1" />
     </>
   ),
+  // Galho com folhas (podas)
+  galho: (
+    <>
+      <path d="M3 19 20 6" />
+      <path d="m9 14.5 1-4.5M14 10.5l4 .5" />
+      <path d="M10 10c-2-1-2.5-3-1.5-5 2 .6 2.8 2.6 1.5 5zM18 11c1.8-1.4 3.8-1 5 .7-1.8 1.3-3.8 1-5-.7z" />
+    </>
+  ),
+  // Folha (grama e folhas)
+  folha: (
+    <>
+      <path d="M5 19C4 11 9 5 20 4c0 9-5 15-15 15z" />
+      <path d="M5 19 14 10" />
+    </>
+  ),
+  // Pegada de animal
+  animal: (
+    <>
+      <path d="M12 12c-3 0-6 3.5-6 6 0 1.5 1 2.5 2.5 2.5 1.3 0 2.2-.8 3.5-.8s2.2.8 3.5.8c1.5 0 2.5-1 2.5-2.5 0-2.5-3-6-6-6z" />
+      <circle cx="6" cy="9" r="1.6" />
+      <circle cx="10" cy="5.5" r="1.6" />
+      <circle cx="14" cy="5.5" r="1.6" />
+      <circle cx="18" cy="9" r="1.6" />
+    </>
+  ),
 };
 
 export function IconeMaterial({ nome, tamanho }) {

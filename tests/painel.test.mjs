@@ -152,10 +152,14 @@ test("cadastro de condomínio: confere os campos", () => {
     nome: "Jardins",
     regiao: null,
     dias: [2, 5],
+    dias_poda: [],
     horario: "14:00",
     piloto: true,
     ativo: true,
   });
+  assert.deepEqual(linhaDoCondominio({ nome: "M", dias: [4, 2], dias_poda: [1, 1], horario: "14:00" }).dias_poda, [1]);
+  assert.ok(validarCondominio({ nome: "X", dias: [2], dias_poda: [9], horario: "14:00" }).erros.dias_poda);
+  assert.equal(validarCondominio({ nome: "Mirante", dias: [2], dias_poda: [1], horario: "14:00" }).ok, true);
 });
 
 test("mensagem para o WhatsApp usa os dados do condomínio e o link dele", () => {
@@ -173,15 +177,35 @@ test("mensagem para o WhatsApp usa os dados do condomínio e o link dele", () =>
   assert.equal(decodeURIComponent(link.slice("https://wa.me/?text=".length)), texto);
 });
 
+test("mensagem do WhatsApp fala da poda só quando o condomínio tem poda", () => {
+  const mirante = mensagemWhatsApp({ id: "m", nome: "Mirante", dias: [2, 4], dias_poda: [1], horario: "14:00" }, "https://a.b");
+  assert.match(mirante, /recicláveis é toda \*terça-feira e quinta-feira\*, às \*14h\*/);
+  assert.match(mirante, /coleta de podas .* é toda \*segunda-feira\*, às \*14h\*/);
+  const outro = mensagemWhatsApp({ id: "o", nome: "Outro", dias: [2], dias_poda: [], horario: "09:00" }, "https://a.b");
+  assert.doesNotMatch(outro, /poda/i);
+});
+
+test("SQL 014: coluna de poda, funções do app devolvem dias_poda e Mirante ajustado", () => {
+  const sql = readFileSync(new URL("../supabase/014_coleta_podas.sql", import.meta.url), "utf8");
+  assert.match(sql, /add column if not exists dias_poda smallint\[\]/);
+  assert.equal((sql.match(/select c\.id, c\.nome, c\.regiao, c\.dias, c\.dias_poda, c\.horario, c\.piloto/g) ?? []).length, 2);
+  assert.match(sql, /grant execute on function public\.condominio_por_id\(text\) to anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.buscar_condominios\(text\) to anon, authenticated/);
+  assert.match(sql, /grant update \(dias_poda\)/);
+  assert.match(sql, /set dias = '\{2,4\}', dias_poda = '\{1\}'.*\n\s*where id = 'condominio-ecologico-parque-do-mirante'/);
+});
+
 test("condomínio vindo do banco fica no formato do app", () => {
   assert.deepEqual(normalizarCondominio({ id: "a", nome: "A", regiao: null, dias: ["5", 1], horario: "09:00", piloto: null }), {
     id: "a",
     nome: "A",
     regiao: "",
     dias: [1, 5],
+    diasPoda: [],
     horario: "09:00",
     piloto: false,
   });
+  assert.deepEqual(normalizarCondominio({ id: "m", nome: "M", dias: [4, 2], dias_poda: ["1"], horario: "14:00" }).diasPoda, [1]);
 });
 
 test("servidor do lembrete lê só condomínios ativos", async () => {
@@ -191,11 +215,20 @@ test("servidor do lembrete lê só condomínios ativos", async () => {
     chave: "sb_secret_t",
     buscar: async (e) => {
       endereco = e;
-      return { ok: true, json: async () => [{ id: "a", nome: "A", dias: ["2"], horario: "09:00" }] };
+      return {
+        ok: true,
+        json: async () => [
+          { id: "a", nome: "A", dias: ["2"], dias_poda: null, horario: "09:00" },
+          { id: "m", nome: "M", dias: [2, 4], dias_poda: ["1"], horario: "14:00" },
+        ],
+      };
     },
   });
-  assert.deepEqual(await banco.buscarCondominios(), [{ id: "a", nome: "A", dias: [2], horario: "09:00" }]);
-  assert.match(endereco, /condominios\?select=id,nome,dias,horario&ativo=is\.true$/);
+  assert.deepEqual(await banco.buscarCondominios(), [
+    { id: "a", nome: "A", dias: [2], diasPoda: [], horario: "09:00" },
+    { id: "m", nome: "M", dias: [2, 4], diasPoda: [1], horario: "14:00" },
+  ]);
+  assert.match(endereco, /condominios\?select=id,nome,dias,dias_poda,horario&ativo=is\.true$/);
 });
 
 test("pedido do painel leva o login (token) e lê a resposta", async () => {

@@ -32,6 +32,7 @@ export function normalizarCondominio(linha) {
     nome: linha.nome,
     regiao: linha.regiao ?? "",
     dias: (linha.dias ?? []).map(Number).sort((a, b) => a - b),
+    diasPoda: (linha.dias_poda ?? linha.diasPoda ?? []).map(Number).sort((a, b) => a - b),
     horario: linha.horario,
     piloto: Boolean(linha.piloto),
     ...(linha.exemplo ? { exemplo: true } : {}),

@@ -3,7 +3,13 @@
 
 import { createHash, timingSafeEqual } from "node:crypto";
 import { condominios as todosCondominios } from "../src/data/condominios.js";
-import { condominiosComColetaNoDia, textoLembrete } from "../src/lib/coleta.js";
+import {
+  coletasDoDia,
+  condominiosComColetaNoDia,
+  textoLembrete,
+  textoLembretePoda,
+  textoLembreteDosDois,
+} from "../src/lib/coleta.js";
 
 // Só entregamos para serviços de notificação conhecidos (Google, Apple, Mozilla, Microsoft).
 const SERVICOS_PUSH = [
@@ -52,12 +58,18 @@ export function registroDoEnvio(resumo, erro = null) {
   };
 }
 
-export function mensagemDoLembrete(condominio) {
-  return {
-    titulo: "Hoje tem coleta seletiva",
-    corpo: textoLembrete(condominio.horario),
-    url: "/coleta",
-  };
+// O texto muda conforme a coleta do dia: recicláveis, podas ou as duas.
+export function mensagemDoLembrete(condominio, agora = new Date()) {
+  const tipos = coletasDoDia(condominio, agora);
+  const podas = tipos.includes("podas");
+  const reciclaveis = tipos.includes("reciclaveis") || !podas;
+  if (podas && reciclaveis) {
+    return { titulo: "Hoje tem coleta seletiva e de podas", corpo: textoLembreteDosDois(condominio.horario), url: "/coleta" };
+  }
+  if (podas) {
+    return { titulo: "Hoje tem coleta de podas", corpo: textoLembretePoda(condominio.horario), url: "/coleta" };
+  }
+  return { titulo: "Hoje tem coleta seletiva", corpo: textoLembrete(condominio.horario), url: "/coleta" };
 }
 
 // Envia o lembrete para quem mora em condomínio com coleta hoje.
@@ -87,7 +99,7 @@ export async function enviarLembretesDoDia({
     try {
       await enviarPush(
         { endpoint: inscricao.endpoint, keys: { p256dh: inscricao.p256dh, auth: inscricao.auth } },
-        JSON.stringify(mensagemDoLembrete(condominio)),
+        JSON.stringify(mensagemDoLembrete(condominio, agora)),
       );
       resumo.enviados++;
     } catch (erro) {

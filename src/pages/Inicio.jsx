@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import ProximaColeta from "../components/ProximaColeta.jsx";
+import ColetaPodas from "../components/ColetaPodas.jsx";
 import Instalar from "../components/Instalar.jsx";
 import { AvisoPreencher } from "../components/Comuns.jsx";
 import { IconePredio, IconeReciclar, IconeConversa, IconeSeta, IconeEstrela } from "../components/Icones.jsx";
@@ -21,6 +22,7 @@ export default function Inicio({ condominio }) {
       {condominio.exemplo && <AvisoPreencher>Dia e horário de exemplo, ainda não são os reais.</AvisoPreencher>}
 
       <ProximaColeta condominio={condominio} />
+      <ColetaPodas condominio={condominio} resumo />
 
       <nav className="atalhos" aria-label="Atalhos">
         <Link to="/recicla" className="atalho">

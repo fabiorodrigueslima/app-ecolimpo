@@ -138,6 +138,12 @@ function CartazConteudo({ condominios }) {
               A coleta passa às <strong>{formatarHorario(condominio.horario)}</strong> ({periodoDoHorario(condominio.horario)})
             </p>
             <p className="cartaz-dica">Coloque os recicláveis para fora antes desse horário.</p>
+            {condominio.diasPoda?.length > 0 && (
+              <p className="cartaz-dica">
+                Coleta de podas (galhos, grama e folhas): toda {descreverDias(condominio.diasPoda)}, às{" "}
+                {formatarHorario(condominio.horario)}.
+              </p>
+            )}
           </section>
         )}
 

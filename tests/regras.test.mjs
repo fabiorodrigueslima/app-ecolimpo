@@ -12,6 +12,9 @@ import {
   proximasColetas,
   rotuloDaColeta,
   conferirCondominios,
+  coletasDoDia,
+  proximaPoda,
+  proximasColetasComTipo,
 } from "../src/lib/coleta.js";
 import { normalizar } from "../src/lib/busca.js";
 import {
@@ -170,4 +173,26 @@ test("mensagem: tipo, texto e condomínio obrigatórios", () => {
   assert.deepEqual(Object.keys(ruim.erros).sort(), ["condominioId", "texto", "tipo"]);
   assert.ok(validarMensagem({ ...dados, texto: "x".repeat(1001) }, ids).erros.texto);
   assert.ok(validarMensagem({ ...dados, nome: "x".repeat(81) }, ids).erros.nome);
+});
+
+test("coleta de podas: só no condomínio que tem dia de poda", () => {
+  const mirante = { id: "m", nome: "M", dias: [2, 4], diasPoda: [1], horario: "14:00" };
+  assert.deepEqual(coletasDoDia(mirante, TERCA_0630_BRASILIA), ["reciclaveis"]);
+  assert.deepEqual(coletasDoDia(mirante, new Date("2026-11-16T09:30:00Z")), ["podas"]); // segunda
+  assert.deepEqual(coletasDoDia(manha, TERCA_0630_BRASILIA), ["reciclaveis"]); // sem diasPoda = só recicláveis
+  assert.equal(proximaPoda(manha, TERCA_0630_BRASILIA), null);
+
+  assert.equal(rotuloDaColeta(proximaPoda(mirante, TERCA_0630_BRASILIA)), "Segunda-feira, 16/11");
+
+  const datas = proximasColetasComTipo(mirante, TERCA_0630_BRASILIA, 4);
+  assert.deepEqual(
+    datas.map((d) => [d.dia, d.tipos]),
+    [
+      [10, ["reciclaveis"]],
+      [12, ["reciclaveis"]],
+      [16, ["podas"]],
+      [17, ["reciclaveis"]],
+    ],
+  );
+  assert.equal(conferirCondominios([{ ...mirante, diasPoda: [8] }]).length, 1);
 });

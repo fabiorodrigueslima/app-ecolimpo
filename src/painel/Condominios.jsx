@@ -45,7 +45,28 @@ function MensagemWhatsApp({ condominio, aoFechar }) {
   );
 }
 
-const VAZIO = { nome: "", regiao: "", dias: [], horario: "", piloto: false, ativo: true };
+const VAZIO = { nome: "", regiao: "", dias: [], dias_poda: [], horario: "", piloto: false, ativo: true };
+
+// Fileira de dias da semana para marcar (usada nos recicláveis e nas podas).
+function EscolherDias({ legenda, dica, campo, dados, erro, mudar }) {
+  const marcados = dados[campo];
+  const alternar = (dia) => mudar(campo, marcados.includes(dia) ? marcados.filter((d) => d !== dia) : [...marcados, dia]);
+  return (
+    <fieldset className="grupo">
+      <legend>{legenda}</legend>
+      {dica && <p className="dica">{dica}</p>}
+      <div className="chips">
+        {NOMES_DIAS.map((nome, dia) => (
+          <label key={dia} className={`chip ${marcados.includes(dia) ? "chip-marcado" : ""}`}>
+            <input type="checkbox" checked={marcados.includes(dia)} onChange={() => alternar(dia)} />
+            {nome.replace("-feira", "")}
+          </label>
+        ))}
+      </div>
+      {erro && <span className="erro">{erro}</span>}
+    </fieldset>
+  );
+}
 
 function Formulario({ inicial, novo, aoSalvar, aoCancelar }) {
   const [dados, setDados] = useState(inicial);
@@ -57,8 +78,6 @@ function Formulario({ inicial, novo, aoSalvar, aoCancelar }) {
     setDados((d) => ({ ...d, [campo]: valor }));
     setErros((e) => ({ ...e, [campo]: undefined }));
   };
-  const alternarDia = (dia) =>
-    mudar("dias", dados.dias.includes(dia) ? dados.dias.filter((d) => d !== dia) : [...dados.dias, dia]);
 
   async function enviar(e) {
     e.preventDefault();
@@ -89,18 +108,15 @@ function Formulario({ inicial, novo, aoSalvar, aoCancelar }) {
         {erros.regiao && <span className="erro">{erros.regiao}</span>}
       </label>
 
-      <fieldset className="grupo">
-        <legend>Dias da coleta</legend>
-        <div className="chips">
-          {NOMES_DIAS.map((nome, dia) => (
-            <label key={dia} className={`chip ${dados.dias.includes(dia) ? "chip-marcado" : ""}`}>
-              <input type="checkbox" checked={dados.dias.includes(dia)} onChange={() => alternarDia(dia)} />
-              {nome.replace("-feira", "")}
-            </label>
-          ))}
-        </div>
-        {erros.dias && <span className="erro">{erros.dias}</span>}
-      </fieldset>
+      <EscolherDias legenda="Dias da coleta seletiva (recicláveis)" campo="dias" dados={dados} erro={erros.dias} mudar={mudar} />
+      <EscolherDias
+        legenda="Dias da coleta de podas (opcional)"
+        dica="Só para condomínio que tem coleta de galhos, grama e folhas. As regras da poda aparecem no app só para ele."
+        campo="dias_poda"
+        dados={dados}
+        erro={erros.dias_poda}
+        mudar={mudar}
+      />
 
       <fieldset className="grupo">
         <legend>Horário de entrada da coleta</legend>
@@ -197,7 +213,7 @@ export default function Condominios({ api }) {
 
   if (editando) {
     const inicial =
-      editando === "novo" ? VAZIO : { ...VAZIO, ...editando, regiao: editando.regiao ?? "", dias: editando.dias ?? [] };
+      editando === "novo" ? VAZIO : { ...VAZIO, ...editando, regiao: editando.regiao ?? "", dias: editando.dias ?? [], dias_poda: editando.dias_poda ?? [] };
     return (
       <section className="painel-secao">
         <Formulario
@@ -266,6 +282,7 @@ export default function Condominios({ api }) {
               <p>
                 {descreverDias(c.dias ?? [])} · às {formatarHorario(c.horario)}
               </p>
+              {c.dias_poda?.length > 0 && <p>Podas: {descreverDias(c.dias_poda)}</p>}
               <p className="dica">Lembrete ligado: {inscritos[c.id] ?? 0} morador(es)</p>
             </div>
             <div className="botoes">

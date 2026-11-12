@@ -31,10 +31,14 @@ export function criarBancoServidor({ url, chave, buscar = globalThis.fetch }) {
 
   // Condomínios ativos (cadastrados pelo painel).
   async function buscarCondominios() {
-    const endereco = `${url.replace(/\/+$/, "")}/rest/v1/condominios?select=id,nome,dias,horario&ativo=is.true`;
+    const endereco = `${url.replace(/\/+$/, "")}/rest/v1/condominios?select=id,nome,dias,dias_poda,horario&ativo=is.true`;
     const resposta = await buscar(endereco, { headers: cabecalhos(chave) });
     if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao ler condomínios`);
-    return (await resposta.json()).map((c) => ({ ...c, dias: (c.dias ?? []).map(Number) }));
+    return (await resposta.json()).map(({ dias_poda, ...c }) => ({
+      ...c,
+      dias: (c.dias ?? []).map(Number),
+      diasPoda: (dias_poda ?? []).map(Number),
+    }));
   }
 
   // Anota o que o despertador fez (o painel mostra o último registro).

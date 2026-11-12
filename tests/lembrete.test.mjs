@@ -112,6 +112,31 @@ test("mensagem da notificação", () => {
   });
 });
 
+test("lembrete do Mirante: segunda = podas, terça = recicláveis", async () => {
+  const SEGUNDA_0630 = new Date("2026-11-16T09:30:00Z");
+  const mirante = { id: "mirante", nome: "Mirante", dias: [2, 4], diasPoda: [1], horario: "14:00" };
+  const outro = { id: "outro", nome: "Outro", dias: [1], horario: "09:00" };
+  const enviados = [];
+  const resumo = await enviarLembretesDoDia({
+    agora: SEGUNDA_0630,
+    condominios: [mirante, outro],
+    buscarInscricoes: async () => [insc("1", "mirante"), insc("2", "outro")],
+    enviarPush: async (i, corpo) => enviados.push(JSON.parse(corpo)),
+    apagarInscricao: async () => {},
+  });
+  assert.deepEqual(resumo.condominios, ["mirante", "outro"]);
+  assert.equal(enviados[0].titulo, "Hoje tem coleta de podas");
+  assert.equal(
+    enviados[0].corpo,
+    "Hoje tem coleta de podas! Galhos de até 1,5 m e grama/folhas ensacadas (até 10 sacos). A coleta passa às 14h.",
+  );
+  assert.equal(enviados[1].titulo, "Hoje tem coleta seletiva"); // outro condomínio não muda
+
+  assert.equal(mensagemDoLembrete(mirante, TERCA_0630).titulo, "Hoje tem coleta seletiva");
+  const osDois = mensagemDoLembrete({ ...mirante, diasPoda: [2] }, TERCA_0630);
+  assert.equal(osDois.titulo, "Hoje tem coleta seletiva e de podas");
+});
+
 // ---------- Função da Vercel (api/lembrete.js) ----------
 
 function respostaFalsa() {

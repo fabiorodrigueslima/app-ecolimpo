@@ -56,17 +56,43 @@ export function descreverDias(dias) {
   return `${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}`;
 }
 
+// Coleta seletiva (recicláveis) no dia.
 export function temColetaNoDia(condominio, data = new Date()) {
-  return condominio.dias.includes(diaDaSemanaEmBrasilia(data));
+  return (condominio.dias ?? []).includes(diaDaSemanaEmBrasilia(data));
 }
 
-// Lista dos condomínios que têm coleta no dia (usada pelo lembrete diário).
+// Dias da coleta de podas (só alguns condomínios têm; os outros ficam com []).
+export function diasDePoda(condominio) {
+  return condominio.diasPoda ?? [];
+}
+
+export function temPodaNoDia(condominio, data = new Date()) {
+  return diasDePoda(condominio).includes(diaDaSemanaEmBrasilia(data));
+}
+
+// Quais coletas o condomínio tem no dia: ["reciclaveis"], ["podas"], os dois ou nenhum.
+export function coletasDoDia(condominio, data = new Date()) {
+  return [
+    ...(temColetaNoDia(condominio, data) ? ["reciclaveis"] : []),
+    ...(temPodaNoDia(condominio, data) ? ["podas"] : []),
+  ];
+}
+
+// Lista dos condomínios que têm alguma coleta no dia (usada pelo lembrete diário).
 export function condominiosComColetaNoDia(lista, data = new Date()) {
-  return lista.filter((c) => temColetaNoDia(c, data));
+  return lista.filter((c) => coletasDoDia(c, data).length > 0);
 }
 
 export function textoLembrete(horario) {
   return `Não esqueça de colocar os recicláveis para fora hoje! A coleta seletiva passa às ${formatarHorario(horario)}.`;
+}
+
+export function textoLembretePoda(horario) {
+  return `Hoje tem coleta de podas! Galhos de até 1,5 m e grama/folhas ensacadas (até 10 sacos). A coleta passa às ${formatarHorario(horario)}.`;
+}
+
+export function textoLembreteDosDois(horario) {
+  return `Hoje tem coleta seletiva e de podas! Coloque os recicláveis e as podas para fora. A coleta passa às ${formatarHorario(horario)}.`;
 }
 
 function somarDias({ ano, mes, dia }, n) {
@@ -80,19 +106,41 @@ function somarDias({ ano, mes, dia }, n) {
 }
 
 // Próximas coletas a partir de hoje (hoje conta, se for dia de coleta).
-export function proximasColetas(condominio, data = new Date(), quantidade = 4) {
-  if (!condominio.dias.length) return [];
+function proximasDatas(dias, data, quantidade) {
+  if (!dias.length) return [];
   const hoje = dataEmBrasilia(data);
   const resultado = [];
   for (let n = 0; resultado.length < quantidade && n < 366; n++) {
     const d = somarDias(hoje, n);
-    if (condominio.dias.includes(d.diaSemana)) resultado.push({ ...d, diasAte: n });
+    if (dias.includes(d.diaSemana)) resultado.push({ ...d, diasAte: n });
   }
   return resultado;
 }
 
+// Coleta seletiva (recicláveis).
+export function proximasColetas(condominio, data = new Date(), quantidade = 4) {
+  return proximasDatas(condominio.dias, data, quantidade);
+}
+
 export function proximaColeta(condominio, data = new Date()) {
   return proximasColetas(condominio, data, 1)[0] ?? null;
+}
+
+// Coleta de podas.
+export function proximaPoda(condominio, data = new Date()) {
+  return proximasDatas(diasDePoda(condominio), data, 1)[0] ?? null;
+}
+
+// Próximas datas das duas coletas juntas, em ordem, com o tipo de cada uma.
+// Ex.: [{ dia: 17, ..., tipos: ["podas"] }, { dia: 18, ..., tipos: ["reciclaveis"] }]
+export function proximasColetasComTipo(condominio, data = new Date(), quantidade = 4) {
+  const reciclaveis = new Set(condominio.dias);
+  const podas = new Set(diasDePoda(condominio));
+  const todos = [...new Set([...reciclaveis, ...podas])];
+  return proximasDatas(todos, data, quantidade).map((d) => ({
+    ...d,
+    tipos: [...(reciclaveis.has(d.diaSemana) ? ["reciclaveis"] : []), ...(podas.has(d.diaSemana) ? ["podas"] : [])],
+  }));
 }
 
 // "Hoje", "Amanhã" ou "Quinta-feira, 13/11"
@@ -117,6 +165,8 @@ export function conferirCondominios(lista) {
     if (!c.nome) erros.push(`${onde}: falta o nome.`);
     if (!Array.isArray(c.dias) || c.dias.some((d) => !Number.isInteger(d) || d < 0 || d > 6))
       erros.push(`${onde}: "dias" deve ter números de 0 (domingo) a 6 (sábado).`);
+    if (c.diasPoda !== undefined && (!Array.isArray(c.diasPoda) || c.diasPoda.some((d) => !Number.isInteger(d) || d < 0 || d > 6)))
+      erros.push(`${onde}: "diasPoda" deve ter números de 0 (domingo) a 6 (sábado).`);
     if (!HORARIOS_VALIDOS.includes(c.horario)) erros.push(`${onde}: "horario" deve ser "09:00" ou "14:00".`);
   });
   return erros;

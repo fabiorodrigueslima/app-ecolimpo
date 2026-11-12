@@ -194,6 +194,8 @@ export function validarCondominio(dados) {
   if (String(dados.regiao ?? "").trim().length > 100) erros.regiao = "A região pode ter até 100 letras.";
   if (!Array.isArray(dados.dias) || dados.dias.length === 0) erros.dias = "Marque pelo menos um dia da coleta.";
   else if (dados.dias.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) erros.dias = "Dia inválido.";
+  const podas = dados.dias_poda ?? [];
+  if (!Array.isArray(podas) || podas.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) erros.dias_poda = "Dia inválido.";
   if (!HORARIOS_VALIDOS.includes(dados.horario)) erros.horario = "Escolha 9h ou 14h.";
   return { ok: Object.keys(erros).length === 0, erros };
 }
@@ -204,6 +206,7 @@ export function linhaDoCondominio(dados) {
     nome: dados.nome.trim(),
     regiao: dados.regiao?.trim() || null,
     dias: [...new Set(dados.dias)].sort((a, b) => a - b),
+    dias_poda: [...new Set(dados.dias_poda ?? [])].sort((a, b) => a - b),
     horario: dados.horario,
     piloto: Boolean(dados.piloto),
     ativo: Boolean(dados.ativo),
@@ -216,12 +219,19 @@ export function linhaDoCondominio(dados) {
 // Usa só os dados do banco (nome, dias, horário) e o link com o condomínio já marcado.
 export function mensagemWhatsApp(condominio, base = URL_APP) {
   const dias = descreverDias(condominio.dias ?? []);
+  const podas = condominio.dias_poda ?? condominio.diasPoda ?? [];
+  const hora = formatarHorario(condominio.horario);
   return [
     "♻️ *Coleta seletiva — Cooperativa Ecolimpo*",
     "",
     `Olá, moradores do *${condominio.nome.trim()}*!`,
     "",
-    `A coleta dos recicláveis é toda *${dias}*, às *${formatarHorario(condominio.horario)}*.`,
+    `A coleta dos recicláveis é toda *${dias}*, às *${hora}*.`,
+    ...(podas.length
+      ? [
+          `A coleta de podas (galhos, grama e folhas) é toda *${descreverDias(podas)}*, às *${hora}*: galhos de até 1,5 m e grama/folhas ensacadas (até 10 sacos por casa). As regras completas estão no app.`,
+        ]
+      : []),
     "",
     "Agora a cooperativa tem um app gratuito. Nele você pode:",
     "• ver o dia da próxima coleta;",
