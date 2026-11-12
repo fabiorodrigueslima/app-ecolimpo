@@ -10,6 +10,7 @@ import {
   textoLembretePoda,
   textoLembreteDosDois,
 } from "../src/lib/coleta.js";
+import { mensagemDoAviso } from "../src/lib/avisos.js";
 
 // Só entregamos para serviços de notificação conhecidos (Google, Apple, Mozilla, Microsoft).
 const SERVICOS_PUSH = [
@@ -64,50 +65,65 @@ export function mensagemDoLembrete(condominio, agora = new Date()) {
   const podas = tipos.includes("podas");
   const reciclaveis = tipos.includes("reciclaveis") || !podas;
   if (podas && reciclaveis) {
-    return { titulo: "Hoje tem coleta seletiva e de podas", corpo: textoLembreteDosDois(condominio.horario), url: "/coleta" };
+    return { titulo: "Hoje tem coleta seletiva e de podas", corpo: textoLembreteDosDois(condominio.horario), url: "/coleta", tag: "lembrete-coleta" };
   }
   if (podas) {
-    return { titulo: "Hoje tem coleta de podas", corpo: textoLembretePoda(condominio.horario), url: "/coleta" };
+    return { titulo: "Hoje tem coleta de podas", corpo: textoLembretePoda(condominio.horario), url: "/coleta", tag: "lembrete-coleta" };
   }
-  return { titulo: "Hoje tem coleta seletiva", corpo: textoLembrete(condominio.horario), url: "/coleta" };
+  return { titulo: "Hoje tem coleta seletiva", corpo: textoLembrete(condominio.horario), url: "/coleta", tag: "lembrete-coleta" };
 }
 
-// Envia o lembrete para quem mora em condomínio com coleta hoje.
+// Mensagens do dia por condomínio: o lembrete da coleta (se tiver coleta hoje)
+// e os avisos da cooperativa marcados para hoje (só de condomínios ativos).
+export function mensagensDoDia(condominios, avisos = [], agora = new Date()) {
+  const porId = new Map();
+  for (const c of condominiosComColetaNoDia(condominios, agora)) porId.set(c.id, [mensagemDoLembrete(c, agora)]);
+  const ativos = new Set(condominios.map((c) => c.id));
+  for (const aviso of avisos) {
+    if (!ativos.has(aviso.condominio_id)) continue;
+    porId.set(aviso.condominio_id, [...(porId.get(aviso.condominio_id) ?? []), mensagemDoAviso(aviso)]);
+  }
+  return porId;
+}
+
+// Envia o lembrete (e os avisos do dia) para quem ligou o lembrete.
 // As funções de banco e de envio são passadas de fora (assim dá para testar).
 export async function enviarLembretesDoDia({
   agora = new Date(),
   condominios = todosCondominios,
+  avisos = [],
   buscarInscricoes,
   enviarPush,
   apagarInscricao,
   lote = 50,
 }) {
-  const doDia = condominiosComColetaNoDia(condominios, agora);
-  const resumo = { condominios: doDia.map((c) => c.id), inscricoes: 0, enviados: 0, removidos: 0, falhas: 0, ignorados: 0 };
-  if (doDia.length === 0) return resumo;
+  const porId = mensagensDoDia(condominios, avisos, agora);
+  const resumo = { condominios: [...porId.keys()], inscricoes: 0, enviados: 0, removidos: 0, falhas: 0, ignorados: 0 };
+  if (porId.size === 0) return resumo;
 
-  const porId = new Map(doDia.map((c) => [c.id, c]));
   const inscricoes = await buscarInscricoes([...porId.keys()]);
   resumo.inscricoes = inscricoes.length;
 
   async function enviarUma(inscricao) {
-    const condominio = porId.get(inscricao.condominio_id);
-    if (!condominio || !endpointConfiavel(inscricao.endpoint)) {
+    const mensagens = porId.get(inscricao.condominio_id);
+    if (!mensagens || !endpointConfiavel(inscricao.endpoint)) {
       resumo.ignorados++;
       return;
     }
-    try {
-      await enviarPush(
-        { endpoint: inscricao.endpoint, keys: { p256dh: inscricao.p256dh, auth: inscricao.auth } },
-        JSON.stringify(mensagemDoLembrete(condominio, agora)),
-      );
-      resumo.enviados++;
-    } catch (erro) {
-      // 404/410 = o celular desligou as notificações ou desinstalou: apaga a inscrição.
-      if (erro?.statusCode === 404 || erro?.statusCode === 410) {
-        await apagarInscricao(inscricao.endpoint).catch(() => {});
-        resumo.removidos++;
-      } else {
+    for (const mensagem of mensagens) {
+      try {
+        await enviarPush(
+          { endpoint: inscricao.endpoint, keys: { p256dh: inscricao.p256dh, auth: inscricao.auth } },
+          JSON.stringify(mensagem),
+        );
+        resumo.enviados++;
+      } catch (erro) {
+        // 404/410 = o celular desligou as notificações ou desinstalou: apaga a inscrição.
+        if (erro?.statusCode === 404 || erro?.statusCode === 410) {
+          await apagarInscricao(inscricao.endpoint).catch(() => {});
+          resumo.removidos++;
+          return;
+        }
         resumo.falhas++;
       }
     }

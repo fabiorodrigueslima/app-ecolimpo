@@ -53,7 +53,7 @@ export default function Privacidade() {
       <ul>
         <li>Melhorar a coleta seletiva e a orientação aos moradores.</li>
         <li>Entender dúvidas e reclamações sobre a coleta no condomínio.</li>
-        <li>Enviar o lembrete no dia da coleta, só para quem pediu.</li>
+        <li>Enviar o lembrete no dia da coleta e avisos da cooperativa (como ações de mobilização no condomínio), só para quem pediu.</li>
       </ul>
       <p>Não vendemos nem compartilhamos seus dados com empresas de propaganda.</p>
 

@@ -2,7 +2,7 @@
 // Guarda uma cópia do app no celular para abrir rápido e mesmo sem internet.
 // Ao mudar este arquivo, aumente a VERSAO para os celulares baixarem a nova cópia.
 
-const VERSAO = "ecolimpo-v2";
+const VERSAO = "ecolimpo-v3";
 const ESSENCIAIS = ["/", "/manifest.webmanifest", "/Nova-logo.png", "/icon-192.png"];
 
 self.addEventListener("install", (evento) => {
@@ -71,7 +71,7 @@ self.addEventListener("push", (evento) => {
       icon: "/icon-192.png",
       badge: "/favicon-48.png",
       lang: "pt-BR",
-      tag: "lembrete-coleta",
+      tag: dados.tag || "lembrete-coleta",
       data: { url: dados.url || "/coleta" },
     }),
   );

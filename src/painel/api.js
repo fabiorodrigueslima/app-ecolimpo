@@ -126,6 +126,19 @@ export function criarApiPainel(obterToken) {
       });
     },
 
+    // Avisos de hoje em diante (aba Avisos).
+    listarAvisos(desde) {
+      return pedir("GET", `avisos?select=*&data=gte.${encodeURIComponent(desde)}&order=data.asc,id.asc`);
+    },
+
+    criarAviso(linha) {
+      return pedir("POST", "avisos", { corpo: linha, prefer: "return=minimal" });
+    },
+
+    apagarAviso(id) {
+      return pedir("DELETE", `avisos?id=eq.${encodeURIComponent(id)}`, { prefer: "return=minimal" });
+    },
+
     contarInscricoes() {
       return pedir("POST", "rpc/contar_inscricoes", { corpo: {} });
     },

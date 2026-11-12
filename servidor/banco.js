@@ -41,6 +41,14 @@ export function criarBancoServidor({ url, chave, buscar = globalThis.fetch }) {
     }));
   }
 
+  // Avisos da cooperativa marcados para o dia (data no formato "2026-11-14").
+  async function buscarAvisosDoDia(data) {
+    const endereco = `${url.replace(/\/+$/, "")}/rest/v1/avisos?select=id,condominio_id,texto&data=eq.${encodeURIComponent(data)}&notificar=is.true`;
+    const resposta = await buscar(endereco, { headers: cabecalhos(chave) });
+    if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao ler avisos`);
+    return resposta.json();
+  }
+
   // Anota o que o despertador fez (o painel mostra o último registro).
   async function registrarEnvio(registro) {
     const resposta = await buscar(`${url.replace(/\/+$/, "")}/rest/v1/envios_lembrete`, {
@@ -51,5 +59,5 @@ export function criarBancoServidor({ url, chave, buscar = globalThis.fetch }) {
     if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status} ao registrar o envio`);
   }
 
-  return { buscarInscricoes, apagarInscricao, buscarCondominios, registrarEnvio };
+  return { buscarInscricoes, apagarInscricao, buscarCondominios, buscarAvisosDoDia, registrarEnvio };
 }

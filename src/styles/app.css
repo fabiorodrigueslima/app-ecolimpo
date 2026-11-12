@@ -422,3 +422,10 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .legenda-cor { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
 .legenda-cor + .legenda-cor, .legenda-semana .legenda-cor:nth-of-type(2) { margin-left: 10px; }
 .tipo-coleta { color: var(--text-muted); font-weight: 600; }
+
+/* ===== Aviso da cooperativa (ex.: mobilização) ===== */
+.avisos-morador { display: grid; gap: 10px; }
+.aviso-morador { display: grid; gap: 6px; padding: 14px 16px; border-radius: var(--radius); background: #fffbea; border: 2px solid #e8c55a; box-shadow: var(--shadow-sm); }
+.aviso-morador p { margin: 0; }
+.aviso-morador-topo { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #6b4e00; }
+.aviso-morador-texto { color: var(--brand-blue-dark); font-weight: 600; line-height: 1.4; }

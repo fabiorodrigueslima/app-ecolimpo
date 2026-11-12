@@ -13,6 +13,7 @@ import * as webpush from "web-push";
 import { contatos } from "../src/data/contatos.js";
 import { criarBancoServidor } from "../servidor/banco.js";
 import { enviarLembretesDoDia, pedidoAutorizado, registroDoEnvio } from "../servidor/lembrete.js";
+import { hojeISO } from "../src/lib/avisos.js";
 
 const NECESSARIAS = ["VITE_SUPABASE_URL", "SUPABASE_SECRET_KEY", "VITE_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "LEMBRETE_SEGREDO"];
 
@@ -42,6 +43,11 @@ export default async function handler(req, res) {
   try {
     const resumo = await enviarLembretesDoDia({
       condominios: await banco.buscarCondominios(),
+      // Se os avisos falharem, o lembrete da coleta continua saindo.
+      avisos: await banco.buscarAvisosDoDia(hojeISO()).catch((erro) => {
+        console.error("Avisos do dia não lidos:", erro.message);
+        return [];
+      }),
       buscarInscricoes: banco.buscarInscricoes,
       apagarInscricao: banco.apagarInscricao,
       // TTL: se o celular estiver desligado, o aviso espera até 6 horas (depois perde o sentido).

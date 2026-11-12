@@ -120,10 +120,10 @@ export default function Lembrete({ condominio }) {
           {ligado ? (
             <p className="lembrete-ligado">
               <IconeCheck tamanho={20} /> Lembrete ligado. Você recebe um aviso às 6h30 do dia da coleta (a coleta passa
-              às {hora}).
+              às {hora}) e os avisos da cooperativa para o seu condomínio.
             </p>
           ) : (
-            <p>Receba um aviso às 6h30 do dia da coleta para não esquecer de colocar os recicláveis para fora.</p>
+            <p>Receba um aviso às 6h30 do dia da coleta para não esquecer de colocar os recicláveis para fora, e os avisos da cooperativa para o seu condomínio.</p>
           )}
           {ligado === false && <VerificacaoHumana key={chaveVerificacao} aoVerificar={setToken} />}
           {erro && (

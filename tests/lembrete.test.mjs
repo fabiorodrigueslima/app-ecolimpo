@@ -109,6 +109,7 @@ test("mensagem da notificação", () => {
     titulo: "Hoje tem coleta seletiva",
     corpo: "Não esqueça de colocar os recicláveis para fora hoje! A coleta seletiva passa às 14h.",
     url: "/coleta",
+    tag: "lembrete-coleta",
   });
 });
 

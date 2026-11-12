@@ -109,3 +109,11 @@
 .mfa-qr img { width: 200px; height: 200px; }
 .mfa-chave { padding: 8px 10px; border-radius: 8px; background: var(--surface-soft); font-size: 0.95rem; letter-spacing: 0.08em; overflow-wrap: anywhere; text-align: center; }
 .campo-codigo { font-size: 1.6rem !important; letter-spacing: 0.4em; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* Avisos aos moradores */
+.avisos-subtitulo { margin: 8px 0 0; font-size: 1.05rem; }
+.avisos-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.aviso-item { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-left: 4px solid var(--brand-lime); border-radius: var(--radius); background: #fff; }
+.aviso-item > div { flex: 1 1 280px; display: grid; gap: 4px; }
+.aviso-item p { margin: 0; }
+.aviso-horas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }

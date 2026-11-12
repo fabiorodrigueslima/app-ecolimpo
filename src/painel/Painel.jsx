@@ -10,6 +10,7 @@ import NovaSenha from "./NovaSenha.jsx";
 import Respostas from "./Respostas.jsx";
 import Condominios from "./Condominios.jsx";
 import Backup from "./Backup.jsx";
+import Avisos from "./Avisos.jsx";
 import "./painel.css";
 
 // Lê o link do e-mail (nova senha / convite) uma vez, ao abrir.
@@ -152,12 +153,16 @@ export default function Painel() {
           <button type="button" aria-pressed={aba === "condominios"} onClick={() => setAba("condominios")}>
             Condomínios
           </button>
+          <button type="button" aria-pressed={aba === "avisos"} onClick={() => setAba("avisos")}>
+            Avisos
+          </button>
           <button type="button" aria-pressed={aba === "backup"} onClick={() => setAba("backup")}>
             Backup
           </button>
         </nav>
         {aba === "respostas" && <Respostas api={api} />}
         {aba === "condominios" && <Condominios api={api} />}
+        {aba === "avisos" && <Avisos api={api} />}
         {aba === "backup" && <Backup api={api} />}
       </>
     );
