@@ -1,5 +1,6 @@
 {
   "outputDirectory": "build",
+  "regions": ["gru1"],
   "rewrites": [
     { "source": "/((?!api/|assets/|sw\\.js|manifest\\.webmanifest|.*\\.png).*)", "destination": "/index.html" }
   ],

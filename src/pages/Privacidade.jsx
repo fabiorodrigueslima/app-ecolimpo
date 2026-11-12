@@ -63,6 +63,10 @@ export default function Privacidade() {
           As respostas ficam num banco de dados do serviço <strong>Supabase</strong>, em servidor no Brasil (São Paulo).
         </li>
         <li>
+          O app é hospedado pela <strong>Vercel</strong>. O envio das respostas passa por um servidor dela em São Paulo,
+          que só repassa os dados ao banco e não guarda o que você escreveu.
+        </li>
+        <li>
           Os avisos do lembrete passam pelo serviço de notificações do seu celular (Google, Apple, Mozilla ou Microsoft),
           que só entrega a mensagem.
         </li>

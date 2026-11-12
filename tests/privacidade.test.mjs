@@ -17,3 +17,10 @@ test("o prazo da política é o mesmo da limpeza automática do banco", () => {
   assert.equal(meses, privacidade.prazoMeses);
   assert.equal(privacidade.prazoRespostas, `${privacidade.prazoMeses} meses`);
 });
+
+test("servidor do app fica em São Paulo, como diz a política de privacidade", () => {
+  const vercel = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
+  assert.deepEqual(vercel.regions, ["gru1"]); // gru1 = São Paulo
+  const pagina = readFileSync(new URL("../src/pages/Privacidade.jsx", import.meta.url), "utf8");
+  assert.match(pagina, /Vercel<\/strong>.*São Paulo/s);
+});

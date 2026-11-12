@@ -9,5 +9,5 @@ export const privacidade = {
   // Quem cuida dos dados (controlador, pela LGPD).
   responsavel: "Cooperativa de Trabalho de Catadores Ecolimpo",
   // Data da última atualização da política.
-  atualizadaEm: "11/11/2026",
+  atualizadaEm: "12/11/2026",
 };
