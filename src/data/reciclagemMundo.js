@@ -50,3 +50,9 @@ export const depoimento = {
   autor: "A PREENCHER",
   funcao: "catador(a) da Cooperativa Ecolimpo",
 };
+
+// Enquanto a frase do catador não chega, aparece esta, assinada pela Cooperativa.
+export const mensagemDaCooperativa = {
+  texto: "O que você separa em casa vira trabalho e renda para quem vive da reciclagem. Seu gesto chega até nós.",
+  autor: "Cooperativa Ecolimpo",
+};

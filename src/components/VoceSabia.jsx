@@ -1,6 +1,5 @@
-import { paises, notaMetodologia, depoimento } from "../data/reciclagemMundo.js";
+import { paises, notaMetodologia, depoimento, mensagemDaCooperativa } from "../data/reciclagemMundo.js";
 import { formatarPorcentagem, ordenarPaises, frasesDoQuadro, fontesUnicas, depoimentoPreenchido } from "../lib/voceSabia.js";
-import { AvisoPreencher } from "./Comuns.jsx";
 
 // Quadro com a comparação da reciclagem entre países.
 export function VoceSabia() {
@@ -46,7 +45,12 @@ export function VoceSabia() {
 // Frase de um catador ou catadora da cooperativa.
 export function Depoimento() {
   if (!depoimentoPreenchido(depoimento)) {
-    return <AvisoPreencher>Aqui vai a frase de um catador ou catadora da cooperativa.</AvisoPreencher>;
+    return (
+      <figure className="depoimento">
+        <blockquote>“{mensagemDaCooperativa.texto}”</blockquote>
+        <figcaption>— {mensagemDaCooperativa.autor}</figcaption>
+      </figure>
+    );
   }
   return (
     <figure className="depoimento">

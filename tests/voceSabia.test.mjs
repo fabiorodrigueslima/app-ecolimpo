@@ -57,3 +57,10 @@ test("frase do catador fica escondida até ser preenchida", () => {
   assert.equal(depoimentoPreenchido({ texto: "Separar o lixo é dar valor ao nosso trabalho." }), true);
   assert.equal(depoimentoPreenchido(depoimento), false); // ainda não chegou
 });
+
+test("sem a frase do catador, aparece a mensagem da Cooperativa (sem A PREENCHER)", async () => {
+  const { mensagemDaCooperativa } = await import("../src/data/reciclagemMundo.js");
+  assert.ok(mensagemDaCooperativa.texto.length > 20);
+  assert.doesNotMatch(mensagemDaCooperativa.texto + mensagemDaCooperativa.autor, /A PREENCHER/);
+  assert.equal(mensagemDaCooperativa.autor, "Cooperativa Ecolimpo");
+});
