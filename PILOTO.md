@@ -1,10 +1,12 @@
 # Roteiro do piloto
 
-Passo a passo para testar o app com 1 ou 2 condomínios antes de levar para todos.
+Passo a passo para testar o app com os 3 condomínios antes de levar para todos.
 Cada item com 🔒 precisa da sua autorização antes de ser feito.
 
-**Condomínios do piloto:** A PREENCHER
-**Duração do piloto:** A PREENCHER
+**Situação:** aguardando a aprovação da Diretoria (o projeto ainda será apresentado).
+**Condomínios do piloto:** os 3 atendidos hoje — Condomínio Parque Ecológico do Mirante,
+Condomínio Mônaco e Condomínio San Francisco II.
+**Duração do piloto:** A PREENCHER (sugestão: 4 semanas)
 **Endereço do app:** https://app.cooperaecolimpo.com.br
 
 ---
@@ -21,9 +23,12 @@ Cada item com 🔒 precisa da sua autorização antes de ser feito.
 
 ## 2. Antes de imprimir
 
-- [ ] Escolher os condomínios do piloto e marcar **"Faz parte do teste piloto"** no painel.
-- [ ] Conferir **dias e horário** de cada condomínio do piloto (San Francisco II: 9h ou 14h?).
-- [ ] Conferir a **região** ("TORÓRÓ" → "Tororó"?).
+- [ ] **Aprovação da Diretoria** (apresentar o projeto e o slide de lançamento).
+- [x] Escolher os condomínios do piloto: os 3 condomínios (12/11/2026).
+- [ ] Depois da aprovação: marcar **"Faz parte do teste piloto"** nos 3, no painel (é só uma etiqueta; não muda nada para o morador).
+- [ ] Conferir **dias e horário** de cada condomínio (San Francisco II: 9h ou 14h?).
+- [x] Parque do Mirante: segunda = coleta de **podas**, terça e quinta = recicláveis, às 14h (SQL 014, 12/11/2026).
+- [x] Região corrigida no painel ("TORORÓ - JARDIM BOTÂNICO").
 - [ ] Testar num **iPhone**: adicionar à tela inicial, ligar o lembrete, receber o aviso.
 - [ ] (Opcional) Frase do catador, com autorização (`src/data/reciclagemMundo.js`).
 - [ ] (Opcional) Revisar as opções de "O que aconteceu?" da pesquisa (`src/data/pesquisa.js`).
