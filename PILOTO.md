@@ -3,10 +3,11 @@
 Passo a passo para testar o app com os 3 condomínios antes de levar para todos.
 Cada item com 🔒 precisa da sua autorização antes de ser feito.
 
-**Situação:** aguardando a aprovação da Diretoria (o projeto ainda será apresentado).
+**Situação:** ✅ APROVADO em 12/11/2026. Custo zero para a cooperativa; o app é do desenvolvedor e a Ecolimpo tem uso gratuito (formalizar por escrito).
 **Condomínios do piloto:** os 3 atendidos hoje — Condomínio Parque Ecológico do Mirante,
 Condomínio Mônaco e Condomínio San Francisco II.
-**Duração do piloto:** A PREENCHER (sugestão: 4 semanas)
+**Duração do piloto:** 4 semanas, contadas a partir do dia em que os cartazes forem colados.
+**Metas (proposta, ver resumo da Diretoria):** 15% dos apartamentos com o aviso ligado · NPS acima de 30 · pelo menos 10 respostas por condomínio.
 **Endereço do app:** https://app.cooperaecolimpo.com.br
 
 ---
@@ -23,13 +24,16 @@ Condomínio Mônaco e Condomínio San Francisco II.
 
 ## 2. Antes de imprimir
 
-- [ ] **Aprovação da Diretoria** (apresentar o projeto e o slide de lançamento).
+- [x] **Aprovação da Diretoria** (12/11/2026).
 - [x] Escolher os condomínios do piloto: os 3 condomínios (12/11/2026).
-- [ ] Depois da aprovação: marcar **"Faz parte do teste piloto"** nos 3, no painel (é só uma etiqueta; não muda nada para o morador).
+- [ ] Marcar **"Faz parte do teste piloto"** nos 3, no painel (é só uma etiqueta; não muda nada para o morador).
 - [x] San Francisco II: coleta pela manhã, **10h** (pedido do síndico; SQL 015, 12/11/2026).
 - [x] Parque do Mirante: segunda = coleta de **podas**, terça e quinta = recicláveis, às 14h (SQL 014, 12/11/2026).
 - [x] Região corrigida no painel ("TORORÓ - JARDIM BOTÂNICO").
-- [ ] Testar num **iPhone**: adicionar à tela inicial, ligar o lembrete, receber o aviso.
+- [ ] Testar num **iPhone**: adicionar à tela inicial, ligar o lembrete, receber o aviso (em andamento: Carol, aviso de poda esperado seg 16/11 às 6h30).
+- [ ] Levantar o **número de apartamentos** de cada condomínio (para medir a adesão).
+- [ ] Deixar **por escrito** com a cooperativa: o app é do desenvolvedor e a Ecolimpo tem uso gratuito.
+- [ ] Avisar os **síndicos** e pedir autorização para colar o cartaz (painel › Condomínios › WhatsApp gera a mensagem).
 - [ ] (Opcional) Frase do catador, com autorização (`src/data/reciclagemMundo.js`).
 - [ ] (Opcional) Revisar as opções de "O que aconteceu?" da pesquisa (`src/data/pesquisa.js`).
 
