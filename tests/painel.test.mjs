@@ -113,6 +113,9 @@ test("tela do cadastro usa o QR desenhado pelo app (não a imagem do Supabase)",
 test("nova senha: os dois campos têm o olho para mostrar/ocultar", () => {
   const tela = readFileSync(new URL("../src/painel/NovaSenha.jsx", import.meta.url), "utf8");
   assert.equal((tela.match(/<CampoSenha /g) ?? []).length, 2);
+  const login = readFileSync(new URL("../src/painel/Login.jsx", import.meta.url), "utf8");
+  assert.match(login, /<CampoSenha [^>]*autoComplete="current-password"/); // login também tem o olho
+  assert.doesNotMatch(login, /type="password"/);
   const campo = readFileSync(new URL("../src/painel/CampoSenha.jsx", import.meta.url), "utf8");
   assert.match(campo, /type=\{visivel \? "text" : "password"\}/); // começa escondida
   assert.match(campo, /useState\(false\)/);

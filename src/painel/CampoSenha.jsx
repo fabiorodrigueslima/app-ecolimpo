@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IconeOlho, IconeOlhoFechado } from "../components/Icones.jsx";
 
 // Campo de senha com um olho para mostrar/ocultar o que foi digitado.
-export default function CampoSenha({ rotulo, valor, aoMudar, autoComplete = "new-password" }) {
+export default function CampoSenha({ rotulo, valor, aoMudar, autoComplete = "new-password", obrigatorio = false }) {
   const [visivel, setVisivel] = useState(false);
   return (
     <label className="campo">
@@ -13,6 +13,7 @@ export default function CampoSenha({ rotulo, valor, aoMudar, autoComplete = "new
           value={valor}
           onChange={(e) => aoMudar(e.target.value)}
           autoComplete={autoComplete}
+          required={obrigatorio}
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}

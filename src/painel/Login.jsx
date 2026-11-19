@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { entrar, pedirNovaSenha } from "./api.js";
+import CampoSenha from "./CampoSenha.jsx";
 
 export default function Login({ aviso, aoEntrar }) {
   const [email, setEmail] = useState("");
@@ -51,16 +52,7 @@ export default function Login({ aviso, aoEntrar }) {
         <span>E-mail</span>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required />
       </label>
-      <label className="campo">
-        <span>Senha</span>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          autoComplete="current-password"
-          required
-        />
-      </label>
+      <CampoSenha rotulo="Senha" valor={senha} aoMudar={setSenha} autoComplete="current-password" obrigatorio />
       {erro && (
         <p className="erro erro-bloco" role="alert">
           {erro}
