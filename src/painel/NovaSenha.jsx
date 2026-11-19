@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { definirSenha } from "./api.js";
 import { validarNovaSenha } from "./regras.js";
+import CampoSenha from "./CampoSenha.jsx";
 
 // Aberta pelo link do e-mail ("esqueci a senha" ou convite).
 export default function NovaSenha({ sessao, aoTerminar }) {
@@ -27,19 +28,8 @@ export default function NovaSenha({ sessao, aoTerminar }) {
     <form className="painel-caixa" onSubmit={enviar} noValidate>
       <h1>Criar nova senha</h1>
       <p className="dica">Use pelo menos 8 caracteres, misturando letras e números.</p>
-      <label className="campo">
-        <span>Nova senha</span>
-        <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="new-password" />
-      </label>
-      <label className="campo">
-        <span>Repita a nova senha</span>
-        <input
-          type="password"
-          value={confirmacao}
-          onChange={(e) => setConfirmacao(e.target.value)}
-          autoComplete="new-password"
-        />
-      </label>
+      <CampoSenha rotulo="Nova senha" valor={senha} aoMudar={setSenha} />
+      <CampoSenha rotulo="Repita a nova senha" valor={confirmacao} aoMudar={setConfirmacao} />
       {erro && (
         <p className="erro erro-bloco" role="alert">
           {erro}

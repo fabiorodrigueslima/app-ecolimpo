@@ -117,3 +117,14 @@
 .aviso-item > div { flex: 1 1 280px; display: grid; gap: 4px; }
 .aviso-item p { margin: 0; }
 .aviso-horas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Campo de senha com olho (mostrar/ocultar) */
+.campo-senha { position: relative; display: block; }
+.campo-senha input { padding-right: 52px; }
+.botao-olho {
+  position: absolute; top: 50%; right: 4px; transform: translateY(-50%);
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; border-radius: 8px; background: transparent; color: var(--brand-blue-dark, #0b3a5e); cursor: pointer;
+}
+.botao-olho:hover { background: rgba(0, 0, 0, 0.05); }
+.botao-olho:focus-visible { outline: 3px solid var(--brand-green, #2d7d46); outline-offset: 1px; }
