@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BANCO_LIGADO } from "../lib/config.js";
-import { lerRetornoDoEmail, lerAal, etapaDoMfa } from "./regras.js";
+import { lerRetornoDoEmail, lerAal, etapaDoMfa, destinoDoMfa } from "./regras.js";
 import { lerEmail, lerFatores, sair } from "./api.js";
 import { apiPainel as api, definirSessao, obterToken, quandoExpirar, sessaoAtual } from "./sessao.js";
 import DuasEtapas from "./DuasEtapas.jsx";
@@ -14,20 +14,21 @@ import Avisos from "./Avisos.jsx";
 import "./painel.css";
 
 // Lê o link do e-mail (nova senha / convite) uma vez, ao abrir.
+// paraNovaSenha: antes da senha nova, confere se a pessoa já tem autenticador (aí pede o código).
 function estadoInicial() {
   const retorno = lerRetornoDoEmail(window.location.hash);
   if (retorno?.sessao) {
     definirSessao(retorno.sessao, { guardar: false });
-    return { etapa: "nova-senha", aviso: "" };
+    return { etapa: "conferir-mfa", aviso: "", paraNovaSenha: true };
   }
-  return { etapa: sessaoAtual() ? "conferir-mfa" : "login", aviso: retorno?.erro ?? "" };
+  return { etapa: sessaoAtual() ? "conferir-mfa" : "login", aviso: retorno?.erro ?? "", paraNovaSenha: false };
 }
 
 export default function Painel() {
-  const [{ etapa, aviso }, setEstado] = useState(estadoInicial);
+  const [{ etapa, aviso, paraNovaSenha }, setEstado] = useState(estadoInicial);
   const [aba, setAba] = useState("respostas");
   const [mfa, setMfa] = useState(null); // { modo: "cadastrar" | "codigo", fatorId, token }
-  const irPara = (proxima, novoAviso = "") => setEstado({ etapa: proxima, aviso: novoAviso });
+  const irPara = (proxima, novoAviso = "") => setEstado({ etapa: proxima, aviso: novoAviso, paraNovaSenha: false });
   const sessao = sessaoAtual();
 
   useEffect(() => {
@@ -43,18 +44,19 @@ export default function Painel() {
     (async () => {
       const token = await obterToken();
       if (!ativo || !token) return; // sessão terminou: já voltou para o login
-      if (lerAal(token) === "aal2") return setEstado((e) => ({ ...e, etapa: "verificando" }));
+      if (lerAal(token) === "aal2") return setEstado((e) => ({ ...e, etapa: destinoDoMfa("pronto", paraNovaSenha) }));
       const r = await lerFatores(token);
       if (!ativo) return;
       if (!r.ok) return setEstado((e) => ({ ...e, etapa: "sem-conexao" }));
       const fator = r.fatores.find((f) => f.factor_type === "totp" && f.status === "verified");
-      setMfa({ modo: etapaDoMfa(r.fatores, "aal1"), fatorId: fator?.id ?? null, token });
-      setEstado((e) => ({ ...e, etapa: "duas-etapas" }));
+      const modo = etapaDoMfa(r.fatores, "aal1");
+      setMfa({ modo, fatorId: fator?.id ?? null, token });
+      setEstado((e) => ({ ...e, etapa: destinoDoMfa(modo, paraNovaSenha) }));
     })();
     return () => {
       ativo = false;
     };
-  }, [etapa]);
+  }, [etapa, paraNovaSenha]);
 
   // Confere se o login faz parte da equipe.
   useEffect(() => {
@@ -111,14 +113,17 @@ export default function Painel() {
         modo={mfa.modo}
         token={mfa.token}
         fatorId={mfa.fatorId}
+        paraNovaSenha={paraNovaSenha}
         aoSair={fazerSair}
         aoConfirmar={(nova) => {
-          definirSessao({ ...nova, email: nova.email || sessao?.email || "" });
-          irPara("verificando");
+          // Vindo do link do e-mail: só guarda o login depois de criar a senha.
+          definirSessao({ ...nova, email: nova.email || sessao?.email || "" }, { guardar: !paraNovaSenha });
+          if (paraNovaSenha) setEstado((e) => ({ ...e, etapa: "nova-senha" }));
+          else irPara("verificando");
         }}
       />
     );
-  } else if (etapa === "conferir-mfa" || etapa === "verificando") {
+  } else if (etapa === "conferir-mfa" || etapa === "verificando" || (etapa === "duas-etapas" && !mfa)) {
     corpo = <p className="carregando">Conferindo acesso…</p>;
   } else if (etapa === "sem-conexao") {
     corpo = (

@@ -2,7 +2,13 @@
 
 import { requisitar } from "../lib/supabase.js";
 import { URL_SUPABASE, CHAVE_PUBLICA } from "../lib/config.js";
-import { sessaoDaResposta, mensagemDeErroDoLogin, montarFiltroRespostas, linhaDoCondominio } from "./regras.js";
+import {
+  sessaoDaResposta,
+  mensagemDeErroDoLogin,
+  mensagemDeErroDaSenha,
+  montarFiltroRespostas,
+  linhaDoCondominio,
+} from "./regras.js";
 
 const base = (token) => ({ url: URL_SUPABASE, chave: CHAVE_PUBLICA, token });
 
@@ -36,7 +42,7 @@ export async function pedirNovaSenha(email) {
 
 export async function definirSenha(token, senha) {
   const r = await requisitar(base(token), "PUT", "auth/v1/user", { corpo: { password: senha } });
-  return r.ok ? { ok: true } : { ok: false, erro: mensagemDeErroDoLogin(r.status, r.dados) };
+  return r.ok ? { ok: true } : { ok: false, erro: mensagemDeErroDaSenha(r.status, r.dados) };
 }
 
 // ---------- Verificação em 2 etapas (Supabase MFA, tipo TOTP) ----------
@@ -47,13 +53,14 @@ export async function lerFatores(token) {
   return r.ok ? { ok: true, fatores: r.dados?.factors ?? [] } : { ok: false, fatores: [] };
 }
 
-// Primeira vez: cria o autenticador e devolve o QR Code e a chave para digitar.
+// Primeira vez: cria o autenticador e devolve o endereço "otpauth://" (o painel desenha o QR com ele)
+// e a chave para digitar. A imagem pronta do Supabase (qr) fica só como reserva: ela não abria.
 export async function cadastrarAutenticador(token) {
   const r = await requisitar(base(token), "POST", "auth/v1/factors", {
     corpo: { factor_type: "totp", issuer: "Ecolimpo Painel" },
   });
   if (!r.ok) return { ok: false };
-  return { ok: true, id: r.dados.id, qr: r.dados.totp?.qr_code, chave: r.dados.totp?.secret };
+  return { ok: true, id: r.dados.id, uri: r.dados.totp?.uri, qr: r.dados.totp?.qr_code, chave: r.dados.totp?.secret };
 }
 
 // Confere o código de 6 números. Se estiver certo, devolve um login novo (com as 2 etapas).

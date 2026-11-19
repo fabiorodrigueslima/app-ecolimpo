@@ -57,6 +57,30 @@ export function mensagemDeErroDoLogin(status, dados) {
   return "Não foi possível entrar agora. Tente de novo em instantes.";
 }
 
+// Erros ao salvar a senha nova (link do e-mail). O Supabase responde 422 para senha fraca/igual,
+// 401/403 para link vencido ou falta do código do autenticador.
+export function mensagemDeErroDaSenha(status, dados) {
+  if (status === 0) return "Sem conexão. Confira a internet e tente de novo.";
+  if (status === 429) return "Muitas tentativas. Espere alguns minutos e tente de novo.";
+  const codigo = String(dados?.error_code ?? dados?.code ?? dados?.error ?? "");
+  if (/same_password/.test(codigo)) return "A nova senha precisa ser diferente da anterior.";
+  if (/weak_password/.test(codigo)) {
+    const motivos = dados?.weak_password?.reasons ?? [];
+    if (motivos.includes("pwned"))
+      return "Essa senha aparece em listas de senhas vazadas na internet. Escolha outra, que você nunca usou.";
+    if (motivos.includes("characters"))
+      return "Senha fraca. Misture letras maiúsculas, minúsculas, números e um símbolo (ex.: ! @ #).";
+    return "Senha fraca. Use uma senha mais longa, misturando letras, números e símbolos.";
+  }
+  if (/insufficient_aal/.test(codigo))
+    return "Falta o código do app autenticador. Peça um link novo em “Esqueci a senha” e digite o código antes da senha.";
+  if (/reauthentication/.test(codigo))
+    return "Por segurança, peça um link novo em “Esqueci a senha” e crie a senha logo em seguida.";
+  if (status === 401 || status === 403)
+    return "O link do e-mail venceu. Volte ao login, clique em “Esqueci a senha” e use o link do e-mail mais novo.";
+  return "Não foi possível salvar a senha agora. Tente de novo em instantes.";
+}
+
 export function validarNovaSenha(senha, confirmacao) {
   if (String(senha).length < 8) return "A senha precisa ter pelo menos 8 caracteres.";
   if (!/[a-zA-Z]/.test(senha) || !/\d/.test(senha)) return "Misture letras e números na senha.";
@@ -318,6 +342,16 @@ export function etapaDoMfa(fatores, aal) {
   if (aal === "aal2") return "pronto";
   const verificado = (fatores ?? []).find((f) => f.factor_type === "totp" && f.status === "verified");
   return verificado ? "codigo" : "cadastrar";
+}
+
+// Para onde ir depois de conferir as 2 etapas.
+// Quem chegou pelo link de "esqueci a senha" e JÁ tem autenticador precisa digitar o código antes
+// de criar a senha (o Supabase só troca a senha com as 2 etapas). Sem autenticador: cria a senha
+// primeiro e cadastra o autenticador depois.
+export function destinoDoMfa(etapaMfa, paraNovaSenha) {
+  if (etapaMfa === "pronto") return paraNovaSenha ? "nova-senha" : "verificando";
+  if (etapaMfa === "cadastrar" && paraNovaSenha) return "nova-senha";
+  return "duas-etapas";
 }
 
 export function codigoValido(codigo) {

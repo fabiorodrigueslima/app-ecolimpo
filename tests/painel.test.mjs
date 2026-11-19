@@ -7,6 +7,8 @@ import {
   precisaRenovar,
   lerRetornoDoEmail,
   mensagemDeErroDoLogin,
+  mensagemDeErroDaSenha,
+  destinoDoMfa,
   validarNovaSenha,
   montarFiltroRespostas,
   resumoNotas,
@@ -51,6 +53,61 @@ test("mensagens de erro do login em português", () => {
   assert.match(mensagemDeErroDoLogin(0), /Sem conexão/);
   assert.match(mensagemDeErroDoLogin(422, { error_code: "weak_password" }), /tente de novo/i);
   assert.match(mensagemDeErroDoLogin(400, { error_code: "weak_password" }), /Senha fraca/);
+});
+
+test("mensagens de erro ao salvar a senha nova (cada causa com a sua mensagem)", () => {
+  // Respostas no formato do Supabase (PUT /auth/v1/user).
+  assert.match(mensagemDeErroDaSenha(422, { error_code: "same_password" }), /diferente da anterior/);
+  assert.match(mensagemDeErroDaSenha(422, { error_code: "weak_password", weak_password: { reasons: ["pwned"] } }), /vazadas/);
+  assert.match(
+    mensagemDeErroDaSenha(422, { error_code: "weak_password", weak_password: { reasons: ["characters"] } }),
+    /maiúsculas.*símbolo/,
+  );
+  assert.match(mensagemDeErroDaSenha(422, { error_code: "weak_password" }), /mais longa/);
+  assert.match(mensagemDeErroDaSenha(401, { error_code: "insufficient_aal" }), /código do app autenticador/);
+  assert.match(mensagemDeErroDaSenha(401, { error_code: "session_not_found" }), /link do e-mail venceu/);
+  assert.match(mensagemDeErroDaSenha(403, { error_code: "bad_jwt" }), /venceu/);
+  assert.match(mensagemDeErroDaSenha(0), /Sem conexão/);
+  assert.match(mensagemDeErroDaSenha(429), /Muitas tentativas/);
+  assert.match(mensagemDeErroDaSenha(500, {}), /salvar a senha/);
+  // Nunca mais "E-mail ou senha incorretos" nessa tela.
+  for (const [s, d] of [[400, {}], [401, {}], [422, {}]]) assert.doesNotMatch(mensagemDeErroDaSenha(s, d), /incorretos/);
+});
+
+test("link de esqueci a senha: código antes da senha se já houver autenticador", () => {
+  assert.equal(destinoDoMfa("codigo", true), "duas-etapas"); // tem autenticador: código primeiro
+  assert.equal(destinoDoMfa("cadastrar", true), "nova-senha"); // sem autenticador: senha primeiro
+  assert.equal(destinoDoMfa("pronto", true), "nova-senha");
+  // Login normal continua igual.
+  assert.equal(destinoDoMfa("codigo", false), "duas-etapas");
+  assert.equal(destinoDoMfa("cadastrar", false), "duas-etapas");
+  assert.equal(destinoDoMfa("pronto", false), "verificando");
+});
+
+test("QR do autenticador: o app desenha a partir do otpauth e ele lê de volta", async () => {
+  const { svgDoQr, matrizQr } = await import("../src/lib/qr.js");
+  const jsQR = (await import("jsqr")).default;
+  const uri = "otpauth://totp/Ecolimpo%20Painel:equipe%40exemplo.com?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Ecolimpo%20Painel";
+  assert.ok(svgDoQr(uri).caminho.length > 0);
+  // Pinta a matriz em pixels (8 por quadradinho, borda de 4) e lê com o jsQR.
+  const { tamanho, celulas } = matrizQr(uri);
+  const esc = 8, borda = 4, lado = (tamanho + borda * 2) * esc;
+  const px = new Uint8ClampedArray(lado * lado * 4).fill(255);
+  for (let y = 0; y < tamanho; y++)
+    for (let x = 0; x < tamanho; x++)
+      if (celulas[y * tamanho + x])
+        for (let dy = 0; dy < esc; dy++)
+          for (let dx = 0; dx < esc; dx++) {
+            const i = (((y + borda) * esc + dy) * lado + (x + borda) * esc + dx) * 4;
+            px[i] = px[i + 1] = px[i + 2] = 0;
+          }
+  assert.equal(jsQR(px, lado, lado)?.data, uri);
+});
+
+test("tela do cadastro usa o QR desenhado pelo app (não a imagem do Supabase)", () => {
+  const tela = readFileSync(new URL("../src/painel/DuasEtapas.jsx", import.meta.url), "utf8");
+  assert.match(tela, /svgDoQr\(uri\)/);
+  assert.match(readFileSync(new URL("../src/painel/api.js", import.meta.url), "utf8"), /uri: r\.dados\.totp\?\.uri/);
 });
 
 test("nova senha", () => {

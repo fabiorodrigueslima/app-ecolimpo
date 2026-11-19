@@ -1,9 +1,30 @@
 import { useEffect, useState } from "react";
 import { cadastrarAutenticador, confirmarCodigo } from "./api.js";
 import { codigoValido } from "./regras.js";
+import { svgDoQr } from "../lib/qr.js";
+
+// QR do autenticador desenhado pelo próprio app (a imagem pronta do Supabase não abria).
+function QrDoAutenticador({ uri, reserva }) {
+  if (!uri) return <img src={reserva} alt="QR Code para o app autenticador" width="200" height="200" />;
+  const { total, caminho } = svgDoQr(uri);
+  return (
+    <svg
+      viewBox={`0 0 ${total} ${total}`}
+      width="200"
+      height="200"
+      shapeRendering="crispEdges"
+      role="img"
+      aria-label="QR Code para o app autenticador"
+    >
+      <rect width={total} height={total} fill="#fff" />
+      <path d={caminho} fill="#000" />
+    </svg>
+  );
+}
 
 // Verificação em 2 etapas: "cadastrar" (1ª vez, com QR Code) ou "codigo" (vezes seguintes).
-export default function DuasEtapas({ modo, token, fatorId, aoConfirmar, aoSair }) {
+// paraNovaSenha: veio do link de "esqueci a senha" e precisa do código antes de criar a senha.
+export default function DuasEtapas({ modo, token, fatorId, aoConfirmar, aoSair, paraNovaSenha = false }) {
   const [cadastro, setCadastro] = useState(null); // { id, qr, chave }
   const [falhaCadastro, setFalhaCadastro] = useState(false);
   const [codigo, setCodigo] = useState("");
@@ -68,10 +89,10 @@ export default function DuasEtapas({ modo, token, fatorId, aoConfirmar, aoSair }
           </p>
           <ol className="passos">
             <li>
-              Instale no celular um app autenticador gratuito: <strong>Google Authenticator</strong> ou{" "}
-              <strong>Microsoft Authenticator</strong>.
+              Instale no celular um app autenticador gratuito: <strong>Duo Mobile</strong>,{" "}
+              <strong>Google Authenticator</strong> ou <strong>Microsoft Authenticator</strong>.
             </li>
-            <li>No app, toque em “+” e escolha “Ler código QR”.</li>
+            <li>No app, toque em “+” (ou “Adicionar”) e escolha “Ler código QR”.</li>
             <li>Aponte a câmera para o código abaixo.</li>
             <li>Digite aqui os 6 números que aparecerem no app.</li>
           </ol>
@@ -83,7 +104,7 @@ export default function DuasEtapas({ modo, token, fatorId, aoConfirmar, aoSair }
           {!cadastro && !falhaCadastro && <p className="carregando">Preparando o QR Code…</p>}
           {cadastro && (
             <div className="mfa-qr">
-              <img src={cadastro.qr} alt="QR Code para o app autenticador" width="200" height="200" />
+              <QrDoAutenticador uri={cadastro.uri} reserva={cadastro.qr} />
               <button type="button" className="link-botao" onClick={() => setMostrarChave((v) => !v)}>
                 {mostrarChave ? "Esconder a chave" : "Não consegue ler o QR Code? Ver a chave para digitar"}
               </button>
@@ -94,7 +115,14 @@ export default function DuasEtapas({ modo, token, fatorId, aoConfirmar, aoSair }
       ) : (
         <>
           <h1>Código de verificação</h1>
-          <p className="dica">Abra o app autenticador no celular e digite os 6 números do “Ecolimpo Painel”.</p>
+          <p className="dica">
+            {paraNovaSenha && "Antes de criar a senha nova, confirme que é você. "}
+            Abra o app autenticador no celular e digite os 6 números do “Ecolimpo Painel”.
+          </p>
+          <p className="dica">
+            Perdeu o acesso ao app autenticador? A coordenação pode apagar o autenticador no Supabase
+            (Authentication › Users › “Remove MFA factors”) e você cadastra outro.
+          </p>
         </>
       )}
 
