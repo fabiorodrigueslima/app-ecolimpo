@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { contatos, linkWhatsapp } from "../data/contatos.js";
+import { contatos, linkWhatsapp, mensagemDoMorador } from "../data/contatos.js";
 import { Cabecalho } from "../components/Comuns.jsx";
 import { IconeConversa, IconeEstrela, IconeSeta, IconeWhatsapp } from "../components/Icones.jsx";
 
-export default function Fale() {
+export default function Fale({ condominio }) {
   return (
     <div className="pagina">
       <Cabecalho titulo="Fale com a cooperativa" subtitulo="Sua opinião ajuda a melhorar a coleta no seu condomínio." />
@@ -35,7 +35,7 @@ export default function Fale() {
         <h2 id="contato-titulo">Outros contatos</h2>
         <a
           className="botao botao-whatsapp botao-largo"
-          href={linkWhatsapp("Olá! Vim pelo app da Ecolimpo.")}
+          href={linkWhatsapp(mensagemDoMorador(condominio))}
           target="_blank"
           rel="noreferrer"
         >

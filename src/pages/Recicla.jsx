@@ -3,9 +3,9 @@ import { Cabecalho } from "../components/Comuns.jsx";
 import { IconeConversa, IconeWhatsapp } from "../components/Icones.jsx";
 import { VoceSabia, Depoimento } from "../components/VoceSabia.jsx";
 import GuiaSeparacao from "../components/GuiaSeparacao.jsx";
-import { linkWhatsapp } from "../data/contatos.js";
+import { linkWhatsapp, mensagemDoMorador } from "../data/contatos.js";
 
-export default function Recicla() {
+export default function Recicla({ condominio }) {
   return (
     <div className="pagina">
       <Cabecalho titulo="Recicla ou não recicla?" />
@@ -30,7 +30,11 @@ export default function Recicla() {
         </Link>
         <p className="duvida-rodape">
           Prefere uma resposta direta?{" "}
-          <a href={linkWhatsapp("Olá! Tenho uma dúvida sobre a separação dos recicláveis.")} target="_blank" rel="noreferrer">
+          <a
+            href={linkWhatsapp(mensagemDoMorador(condominio, "Tenho uma dúvida sobre a separação dos recicláveis."))}
+            target="_blank"
+            rel="noreferrer"
+          >
             <IconeWhatsapp tamanho={16} className="inline" /> Fale pelo WhatsApp
           </a>
         </p>

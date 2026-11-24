@@ -76,8 +76,8 @@ export default function App() {
           <Route path="/" element={<Inicio condominio={condominio} />} />
           <Route path="/condominio" element={<EscolherCondominio atual={condominio} aoEscolher={escolher} />} />
           <Route path="/coleta" element={<Coleta condominio={condominio} />} />
-          <Route path="/recicla" element={<Recicla />} />
-          <Route path="/fale" element={<Fale />} />
+          <Route path="/recicla" element={<Recicla condominio={condominio} />} />
+          <Route path="/fale" element={<Fale condominio={condominio} />} />
           <Route path="/fale/pesquisa" element={<Pesquisa condominio={condominio} />} />
           <Route path="/fale/mensagem" element={<Mensagem condominio={condominio} />} />
           <Route path="/privacidade" element={<Privacidade />} />

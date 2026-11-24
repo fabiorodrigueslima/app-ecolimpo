@@ -210,3 +210,23 @@ test("horário 10h: aceito no app e no banco (SQL 015), com o mesmo texto", asyn
   assert.deepEqual(conferirCondominios([{ id: "sf", nome: "SF", dias: [3], horario: "10:00" }]), []);
   assert.equal(conferirCondominios([{ id: "sf", nome: "SF", dias: [3], horario: "11:00" }]).length, 1);
 });
+
+test("WhatsApp do morador: diz que veio do app e de qual condomínio", async () => {
+  const { mensagemDoMorador, linkWhatsapp } = await import("../src/data/contatos.js");
+  const sf = { id: "condominio-san-francisco-ii", nome: "Condomínio San Francisco II" };
+  assert.equal(mensagemDoMorador(sf), "Olá! Vim pelo app da Ecolimpo. Sou do Condomínio San Francisco II.");
+  assert.equal(
+    mensagemDoMorador(sf, "Tenho uma dúvida sobre a separação dos recicláveis."),
+    "Olá! Vim pelo app da Ecolimpo. Sou do Condomínio San Francisco II. Tenho uma dúvida sobre a separação dos recicláveis.",
+  );
+  // Sem condomínio escolhido: só diz que veio do app.
+  assert.equal(mensagemDoMorador(null), "Olá! Vim pelo app da Ecolimpo.");
+  // Acentos e espaços vão certos no link do WhatsApp.
+  const link = linkWhatsapp(mensagemDoMorador(sf));
+  assert.ok(link.startsWith("https://wa.me/5561982372013?text="));
+  assert.equal(decodeURIComponent(link.split("text=")[1]), mensagemDoMorador(sf));
+  // As duas telas usam a mensagem nova.
+  const { readFileSync } = await import("node:fs");
+  for (const tela of ["Fale.jsx", "Recicla.jsx"])
+    assert.match(readFileSync(new URL(`../src/pages/${tela}`, import.meta.url), "utf8"), /mensagemDoMorador\(condominio/);
+});
