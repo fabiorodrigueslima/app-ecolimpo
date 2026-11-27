@@ -43,7 +43,9 @@ export function descreverTurno(turno) {
 // Todas as escolhas finais possíveis (área sem partes ou cada parte de uma área).
 export function escolhasDaLista() {
   return AREAS.flatMap((a) =>
-    a.partes ? a.partes.map((p) => ({ ...p, area: a.id, nomeCompleto: `${a.nome} — ${p.nome}` })) : [{ ...a, area: a.id, nomeCompleto: a.nome }],
+    a.partes
+      ? a.partes.map((p) => ({ ...p, area: a.id, grupo: a.grupo, nomeCompleto: `${a.nome} — ${p.nome}` }))
+      : [{ ...a, area: a.id, nomeCompleto: a.nome }],
   );
 }
 

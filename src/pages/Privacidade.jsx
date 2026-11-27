@@ -15,8 +15,8 @@ export default function Privacidade() {
       <h2>O que fica guardado só no seu celular</h2>
       <ul>
         <li>
-          <strong>O condomínio que você escolheu</strong>, para mostrar o dia da sua coleta. Você pode trocar a qualquer
-          momento.
+          <strong>O condomínio ou o bairro (casa / rua) que você escolheu</strong>, para mostrar o dia da sua coleta.
+          Você pode trocar a qualquer momento.
         </li>
         <li>
           <strong>Os dados do seu condomínio</strong> (dias e horário da coleta), para o app abrir mesmo sem internet.
@@ -50,8 +50,8 @@ export default function Privacidade() {
         </li>
         <li>
           <strong>Contagem de uso (sem identificar ninguém):</strong> quando o app é aberto, instalado na tela inicial,
-          aberto pelo QR Code ou quando alguém toca no botão de WhatsApp, o app soma +1 num contador do dia, junto com o
-          condomínio escolhido. Não enviamos nome, telefone, localização nem código do celular: só dá para saber{" "}
+          aberto pelo QR Code, quando alguém toca nos botões de WhatsApp, Ouvidoria do SLU ou mapa do SLU, ou escolhe um
+          bairro, o app soma +1 num contador do dia, junto com o condomínio ou o bairro escolhido. Não enviamos nome, telefone, localização nem código do celular: só dá para saber{" "}
           <strong>quantas vezes</strong>, nunca <strong>quem</strong>.
         </li>
       </ul>

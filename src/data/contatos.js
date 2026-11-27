@@ -17,9 +17,16 @@ export const contatos = {
 // Texto pronto do WhatsApp do morador: diz que veio do app e de qual condomínio,
 // para a cooperativa não precisar perguntar. O texto só vai para o WhatsApp do
 // morador (ele decide se envia); o app não guarda nada.
-export function mensagemDoMorador(condominio, assunto = "") {
+// local: o condomínio ({ nome }) ou a casa ({ tipo: "casa", escolha | foraDaLista }).
+export function mensagemDoMorador(local, assunto = "") {
   const partes = ["Olá! Vim pelo app da Ecolimpo."];
-  if (condominio?.nome) partes.push(`Sou do ${condominio.nome}.`);
+  if (local?.tipo === "casa") {
+    partes.push(
+      local.foraDaLista
+        ? "Moro em casa, numa área que não está na lista do app."
+        : `Moro em casa: ${local.escolha.nomeCompleto} (${local.escolha.grupo ?? ""}).`.replace(" ()", ""),
+    );
+  } else if (local?.nome) partes.push(`Sou do ${local.nome}.`);
   if (assunto) partes.push(assunto);
   return partes.join(" ");
 }

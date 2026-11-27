@@ -1,48 +1,63 @@
 import { Link } from "react-router-dom";
 import { contatos, linkWhatsapp, mensagemDoMorador } from "../data/contatos.js";
 import { contar } from "../lib/contagem.js";
+import AjudaSlu from "../components/AjudaSlu.jsx";
 import { Cabecalho } from "../components/Comuns.jsx";
 import { IconeConversa, IconeEstrela, IconeSeta, IconeWhatsapp } from "../components/Icones.jsx";
 
-export default function Fale({ condominio }) {
+// casa: quem mora em casa / rua (só WhatsApp + botões do SLU; pesquisa e mensagem são dos condomínios).
+export default function Fale({ condominio, casa = null }) {
   return (
     <div className="pagina">
-      <Cabecalho titulo="Fale com a cooperativa" subtitulo="Sua opinião ajuda a melhorar a coleta no seu condomínio." />
+      <Cabecalho
+        titulo="Fale com a cooperativa"
+        subtitulo={
+          casa
+            ? "Nas casas, a rota da coleta é definida pelo SLU."
+            : "Sua opinião ajuda a melhorar a coleta no seu condomínio."
+        }
+      />
 
-      <nav className="atalhos" aria-label="Opções de contato">
-        <Link to="/fale/pesquisa" className="atalho">
-          <span className="atalho-icone atalho-lima">
-            <IconeEstrela />
-          </span>
-          <span>
-            <strong>Pesquisa de satisfação</strong>
-            <small>Dê notas de 1 a 5. Leva menos de 1 minuto.</small>
-          </span>
-          <IconeSeta tamanho={20} />
-        </Link>
-        <Link to="/fale/mensagem" className="atalho">
-          <span className="atalho-icone atalho-azul">
-            <IconeConversa />
-          </span>
-          <span>
-            <strong>Enviar mensagem</strong>
-            <small>Elogio, sugestão, reclamação ou dúvida</small>
-          </span>
-          <IconeSeta tamanho={20} />
-        </Link>
-      </nav>
+      {casa && <AjudaSlu casa={casa} titulo="A coleta não passou ou tem dúvida?" />}
+
+      {!casa && (
+        <nav className="atalhos" aria-label="Opções de contato">
+          <Link to="/fale/pesquisa" className="atalho">
+            <span className="atalho-icone atalho-lima">
+              <IconeEstrela />
+            </span>
+            <span>
+              <strong>Pesquisa de satisfação</strong>
+              <small>Dê notas de 1 a 5. Leva menos de 1 minuto.</small>
+            </span>
+            <IconeSeta tamanho={20} />
+          </Link>
+          <Link to="/fale/mensagem" className="atalho">
+            <span className="atalho-icone atalho-azul">
+              <IconeConversa />
+            </span>
+            <span>
+              <strong>Enviar mensagem</strong>
+              <small>Elogio, sugestão, reclamação ou dúvida</small>
+            </span>
+            <IconeSeta tamanho={20} />
+          </Link>
+        </nav>
+      )}
 
       <section className="cartao cartao-suave" aria-labelledby="contato-titulo">
         <h2 id="contato-titulo">Outros contatos</h2>
-        <a
-          className="botao botao-whatsapp botao-largo"
-          href={linkWhatsapp(mensagemDoMorador(condominio))}
-          onClick={() => contar("whatsapp", condominio)}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <IconeWhatsapp tamanho={20} /> WhatsApp {contatos.telefone}
-        </a>
+        {!casa && (
+          <a
+            className="botao botao-whatsapp botao-largo"
+            href={linkWhatsapp(mensagemDoMorador(condominio))}
+            onClick={() => contar("whatsapp", condominio)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <IconeWhatsapp tamanho={20} /> WhatsApp {contatos.telefone}
+          </a>
+        )}
         <p className="contatos">
           <a href={`mailto:${contatos.email}`}>{contatos.email}</a>
           <br />

@@ -429,3 +429,19 @@ h1, h2 { color: var(--brand-blue-dark); line-height: 1.2; letter-spacing: -0.015
 .aviso-morador p { margin: 0; }
 .aviso-morador-topo { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #6b4e00; }
 .aviso-morador-texto { color: var(--brand-blue-dark); font-weight: 600; line-height: 1.4; }
+
+/* ===== Casas / ruas (circuitos do SLU) ===== */
+button.atalho { width: 100%; font: inherit; text-align: left; cursor: pointer; }
+.grupo-titulo { margin-bottom: 6px; padding: 0; font-weight: 800; color: var(--brand-blue-dark); }
+.parte-do-bairro { padding: 12px; border: 2px solid var(--brand-green); border-radius: 16px; background: #f4faf5; }
+.fonte-slu { margin-top: 10px !important; color: #d6e4ee; font-size: 0.82rem; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.turno-dia { display: block; font-size: 0.62rem; font-weight: 700; line-height: 1.1; }
+.ajuda-slu h2 { margin: 0; }
+.ajuda-slu p { margin: 0; }
+.ajuda-slu-botoes { display: grid; gap: 10px; margin-top: 4px; }
+.ajuda-slu-botoes .botao { display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+.titulo-cartao { margin: 0; font-size: 1.3rem; }
+/* Botão com cara de link (ex.: "Voltar: moro em condomínio") */
+.link-botao { padding: 8px; border: 0; background: none; color: var(--brand-blue); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; min-height: 44px; }
+/* O texto para leitor de tela não segue a 1ª letra maiúscula da semana ("segunda-feira", não "segunda-Feira") */
+.semana li .sr { text-transform: none; }

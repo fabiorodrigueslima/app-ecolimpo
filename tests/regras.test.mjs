@@ -228,5 +228,5 @@ test("WhatsApp do morador: diz que veio do app e de qual condomínio", async () 
   // As duas telas usam a mensagem nova.
   const { readFileSync } = await import("node:fs");
   for (const tela of ["Fale.jsx", "Recicla.jsx"])
-    assert.match(readFileSync(new URL(`../src/pages/${tela}`, import.meta.url), "utf8"), /mensagemDoMorador\(condominio/);
+    assert.match(readFileSync(new URL(`../src/pages/${tela}`, import.meta.url), "utf8"), /mensagemDoMorador\((condominio|local)/);
 });
