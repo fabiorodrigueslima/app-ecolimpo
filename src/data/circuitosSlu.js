@@ -100,7 +100,15 @@ export const AREAS = [
     pergunta: "Em qual quadra você mora?",
     partes: [{ id: "sao-bartolomeu-quadras-1-2", nome: "Quadras 1 e 2", circuitos: ["403206"] }],
   },
-  // Setor Tradicional inteiro (inclui as ruas 12, 13, 14, 15A e 16 citadas no panfleto do SLU).
+  // Setor Tradicional: bairro inteiro, igual ao panfleto do SLU.
   { id: "tradicional", nome: "Setor Tradicional", grupo: "São Sebastião", circuitos: ["403206"] },
+  // Opção separada. NÃO são as ruas da Vila Nova (essas ficam no 403204).
+  {
+    id: "ruas-12-13-14-15a-16",
+    nome: "Ruas 12, 13, 14, 15A e 16",
+    descricao: "Perto do Residencial Oeste e do Morro Azul (não é a Vila Nova)",
+    grupo: "São Sebastião",
+    circuitos: ["403206"],
+  },
   { id: "morro-azul", nome: "Morro Azul", grupo: "São Sebastião", circuitos: ["403206"] },
 ];

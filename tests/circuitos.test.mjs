@@ -34,9 +34,9 @@ test("todas as áreas do pedido estão na lista, com o circuito certo", () => {
   for (const id of ["vila-nova-ruas-12-54", "bela-vista", "residencial-do-bosque"]) assert.deepEqual(circuito(id), ["403204"]);
   for (const id of ["avenida-sao-sebastiao", "residencial-oeste-201-206", "residencial-oeste-301-307"])
     assert.deepEqual(circuito(id), ["403205"]);
-  for (const id of ["avenida-comercial", "sao-bartolomeu-quadras-1-2", "tradicional", "residencial-oeste-101-104", "morro-azul"])
+  for (const id of ["avenida-comercial", "sao-bartolomeu-quadras-1-2", "tradicional", "residencial-oeste-101-104", "ruas-12-13-14-15a-16", "morro-azul"])
     assert.deepEqual(circuito(id), ["403206"]);
-  assert.equal(escolhasDaLista().length, 17); // 3 (Mangueiral/Jd. Botânico) + 14 (São Sebastião, com as partes)
+  assert.equal(escolhasDaLista().length, 18); // 3 (Mangueiral/Jd. Botânico) + 15 (São Sebastião, com as partes)
 });
 
 test("bairros divididos: o morador escolhe a parte; fora dela = 'não está na lista'", () => {
@@ -115,6 +115,22 @@ test("lista das próximas datas sai em ordem", () => {
     lista.map((c) => `${c.dia}/${c.mes} ${c.turno}`),
     ["27/11 tarde", "1/12 manha", "4/12 tarde", "8/12 manha"],
   );
+});
+
+test("circuito 403206 = exatamente a lista do SLU; ruas 12 a 16 separadas da Vila Nova", () => {
+  const do403206 = escolhasDaLista().filter((e) => e.circuitos.includes("403206")).map((e) => e.nomeCompleto);
+  assert.deepEqual(do403206, [
+    "Residencial Oeste — Quadras 101 até 104",
+    "Avenida Comercial",
+    "Bairro São Bartolomeu — Quadras 1 e 2",
+    "Setor Tradicional",
+    "Ruas 12, 13, 14, 15A e 16",
+    "Morro Azul",
+  ]);
+  assert.equal(descreverColetas(escolhaPorId("ruas-12-13-14-15a-16")), "Segunda e quarta, à tarde (13h às 18h)");
+  // Vila Nova (ruas 12 até 54) continua no 403204: quarta e sexta de manhã.
+  assert.deepEqual(escolhaPorId("vila-nova-ruas-12-54").circuitos, ["403204"]);
+  assert.equal(descreverColetas(escolhaPorId("vila-nova-ruas-12-54")), "Quarta e sexta, de manhã (8h às 12h)");
 });
 
 test("ids das áreas servem para os contadores (bairro:<id> aceito pelo SQL 017)", () => {

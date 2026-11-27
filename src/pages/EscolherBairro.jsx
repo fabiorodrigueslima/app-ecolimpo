@@ -57,6 +57,7 @@ export default function EscolherBairro({ aoEscolher, aoVoltar }) {
               />
               <span className="opcao-texto">
                 <strong>{a.nome}</strong>
+                {a.descricao && <small>{a.descricao}</small>}
                 {a.partes && <small>Depois escolha {a.pergunta?.includes("rua") ? "a rua" : "a quadra"}</small>}
               </span>
             </label>
