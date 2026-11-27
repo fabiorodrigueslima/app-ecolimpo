@@ -18,8 +18,8 @@
 // =====================================================================
 
 // Data em que a cooperativa conferiu estes dados no mapa do SLU ("AAAA-MM-DD").
-// A PREENCHER: enquanto estiver vazio, o app não mostra a data.
-export const CONFERIDO_EM = "";
+// Enquanto estiver vazio, o app não mostra a data.
+export const CONFERIDO_EM = "2026-11-27";
 
 export const SLU = {
   nome: "SLU",

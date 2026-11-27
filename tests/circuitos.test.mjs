@@ -13,7 +13,7 @@ import {
   rotuloDaProxima,
   minutosEmBrasilia,
 } from "../src/lib/circuitos.js";
-import { AREAS, TURNOS } from "../src/data/circuitosSlu.js";
+import { AREAS, TURNOS, CONFERIDO_EM } from "../src/data/circuitosSlu.js";
 
 // Horário de Brasília (UTC-3): "2026-11-27 15:00" -> Date
 const brasilia = (dataHora) => new Date(`${dataHora.replace(" ", "T")}:00-03:00`);
@@ -22,6 +22,9 @@ const proxima = (id, quando) => rotuloDaProxima(proximaColetaDe(escolhaPorId(id)
 
 test("arquivo dos circuitos está certo (sem erros)", () => {
   assert.deepEqual(conferirCircuitos(), []);
+  // Data da conferência no mapa do SLU: vazia ou uma data de verdade (AAAA-MM-DD).
+  assert.ok(CONFERIDO_EM === "" || !Number.isNaN(new Date(`${CONFERIDO_EM}T12:00:00Z`).getTime()));
+  assert.match(CONFERIDO_EM, /^(|\d{4}-\d{2}-\d{2})$/);
 });
 
 test("todas as áreas do pedido estão na lista, com o circuito certo", () => {
