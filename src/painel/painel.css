@@ -132,3 +132,13 @@
 /* Contadores de uso (aba Condomínios) */
 .uso-periodo { display: grid; gap: 6px; margin: 12px 0; padding: 12px; border: 1px solid var(--border, #dfe7e2); border-radius: 12px; background: #fff; }
 .uso-periodo select { max-width: 240px; }
+
+/* Tabela dos bairros (casas / ruas) */
+.uso-bairros { margin-top: 24px; display: grid; gap: 8px; }
+.uso-bairros h2 { margin: 0; font-size: 1.2rem; }
+.tabela-rolagem { overflow-x: auto; border: 1px solid var(--border, #dfe7e2); border-radius: 12px; background: #fff; }
+.tabela-uso { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.tabela-uso th, .tabela-uso td { padding: 8px 10px; border-bottom: 1px solid #e8eee9; text-align: right; white-space: nowrap; }
+.tabela-uso th[scope="row"], .tabela-uso thead th:first-child { text-align: left; white-space: normal; min-width: 180px; }
+.tabela-uso thead th { background: #f2f7f3; color: var(--brand-blue-dark, #032b49); }
+.tabela-uso tfoot th, .tabela-uso tfoot td { font-weight: 800; border-bottom: 0; }

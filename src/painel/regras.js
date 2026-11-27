@@ -389,3 +389,33 @@ export function resumoDoUso(numeros = {}) {
     `${n("whatsapp")} no WhatsApp`,
   ].join(" · ");
 }
+
+// Tabela dos bairros (casas / ruas) para conversar com o SLU.
+// uso: resultado de somarContagens; escolhas: lista do arquivo dos circuitos
+// ([{ id, nomeCompleto }]). Devolve as linhas (uma por bairro + "não está na lista")
+// e a linha de total.
+export const COLUNAS_BAIRROS = [
+  { tipo: "abertura", rotulo: "Aberturas" },
+  { tipo: "escolha_bairro", rotulo: "Escolheram" },
+  { tipo: "ouvidoria", rotulo: "Ouvidoria 162" },
+  { tipo: "mapa_slu", rotulo: "Mapa SLU" },
+  { tipo: "whatsapp", rotulo: "WhatsApp" },
+];
+
+export function tabelaDosBairros(uso, escolhas) {
+  const linha = (id, nome, extras = () => ({})) => {
+    const numeros = uso?.[`bairro:${id}`] ?? {};
+    return {
+      id,
+      nome,
+      ...Object.fromEntries(COLUNAS_BAIRROS.map((c) => [c.tipo, numeros[c.tipo] ?? 0])),
+      ...extras(numeros),
+    };
+  };
+  const linhas = escolhas.map((e) => linha(e.id, e.nomeCompleto));
+  // "Meu bairro não está na lista": quantos escolheram fica em fora_da_lista.
+  linhas.push(linha("fora-da-lista", "Meu bairro não está na lista", (n) => ({ escolha_bairro: n.fora_da_lista ?? 0 })));
+  const total = { id: "total", nome: "Total" };
+  for (const c of COLUNAS_BAIRROS) total[c.tipo] = linhas.reduce((s, l) => s + l[c.tipo], 0);
+  return { linhas, total };
+}

@@ -9,7 +9,56 @@ import {
   inicioDoPeriodo,
   somarContagens,
   resumoDoUso,
+  tabelaDosBairros,
+  COLUNAS_BAIRROS,
 } from "./regras.js";
+import { escolhasDaLista } from "../lib/circuitos.js";
+
+// Casas / ruas (circuitos do SLU): números de cada bairro, para conversar com o SLU.
+function UsoDosBairros({ uso, periodo }) {
+  const { linhas, total } = tabelaDosBairros(uso, escolhasDaLista());
+  return (
+    <section className="uso-bairros" aria-labelledby="bairros-titulo">
+      <h2 id="bairros-titulo">Casas / ruas (bairros do SLU)</h2>
+      <p className="dica">
+        {periodo === 1 ? "Hoje" : `Últimos ${periodo} dias`}. Só números, sem saber quem foi. A rota das casas é do SLU: estes
+        números ajudam a conversar com o SLU (ex.: muitos toques na Ouvidoria num bairro).
+      </p>
+      <div className="tabela-rolagem">
+        <table className="tabela-uso">
+          <thead>
+            <tr>
+              <th scope="col">Bairro / área</th>
+              {COLUNAS_BAIRROS.map((c) => (
+                <th key={c.tipo} scope="col">
+                  {c.rotulo}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {linhas.map((l) => (
+              <tr key={l.id}>
+                <th scope="row">{l.nome}</th>
+                {COLUNAS_BAIRROS.map((c) => (
+                  <td key={c.tipo}>{l[c.tipo]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">{total.nome}</th>
+              {COLUNAS_BAIRROS.map((c) => (
+                <td key={c.tipo}>{total[c.tipo]}</td>
+              ))}
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  );
+}
 
 // Caixa com o texto pronto para o síndico mandar no WhatsApp dos moradores.
 function MensagemWhatsApp({ condominio, aoFechar }) {
@@ -361,6 +410,8 @@ export default function Condominios({ api }) {
           </li>
         ))}
       </ul>
+
+      {uso && <UsoDosBairros uso={uso} periodo={periodo} />}
     </section>
   );
 }

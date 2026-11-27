@@ -112,3 +112,31 @@ test("período: últimos N dias contando hoje, no horário de Brasília", () => 
   // 27/11 às 23h em Brasília já é 28/11 em UTC: continua 27/11.
   assert.equal(inicioDoPeriodo(1, new Date("2026-11-28T02:00:00Z")), "2026-11-27");
 });
+
+test("painel: tabela dos bairros (casas) com 'não está na lista' e total", async () => {
+  const { tabelaDosBairros, COLUNAS_BAIRROS } = await import("../src/painel/regras.js");
+  const { escolhasDaLista } = await import("../src/lib/circuitos.js");
+  const uso = somarContagens([
+    { tipo: "abertura", local: "bairro:sao-jose", total: 5 },
+    { tipo: "escolha_bairro", local: "bairro:sao-jose", total: 2 },
+    { tipo: "ouvidoria", local: "bairro:sao-jose", total: 3 },
+    { tipo: "fora_da_lista", local: "bairro:fora-da-lista", total: 4 },
+    { tipo: "ouvidoria", local: "bairro:fora-da-lista", total: 1 },
+    { tipo: "abertura", local: "condominio-san-francisco-ii", total: 9 }, // condomínio não entra
+  ]);
+  const { linhas, total } = tabelaDosBairros(uso, escolhasDaLista());
+  assert.equal(linhas.length, escolhasDaLista().length + 1);
+  const saoJose = linhas.find((l) => l.id === "sao-jose");
+  assert.deepEqual(
+    { nome: saoJose.nome, abertura: saoJose.abertura, escolha: saoJose.escolha_bairro, ouvidoria: saoJose.ouvidoria },
+    { nome: "Bairro São José", abertura: 5, escolha: 2, ouvidoria: 3 },
+  );
+  const fora = linhas.at(-1);
+  assert.equal(fora.nome, "Meu bairro não está na lista");
+  assert.equal(fora.escolha_bairro, 4); // quantos escolheram "não está na lista"
+  assert.equal(fora.ouvidoria, 1);
+  assert.deepEqual(
+    Object.fromEntries(COLUNAS_BAIRROS.map((c) => [c.tipo, total[c.tipo]])),
+    { abertura: 5, escolha_bairro: 6, ouvidoria: 4, mapa_slu: 0, whatsapp: 0 },
+  );
+});
