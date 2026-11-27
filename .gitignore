@@ -29,3 +29,6 @@ build-verification
 .env
 .env.*
 !.env.example
+
+# Arquivos de divulgação (panfletos, PDFs para a gráfica): ficam só no computador
+panfleto-qr/
