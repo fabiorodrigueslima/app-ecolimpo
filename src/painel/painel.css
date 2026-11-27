@@ -128,3 +128,7 @@
 }
 .botao-olho:hover { background: rgba(0, 0, 0, 0.05); }
 .botao-olho:focus-visible { outline: 3px solid var(--brand-green, #2d7d46); outline-offset: 1px; }
+
+/* Contadores de uso (aba Condomínios) */
+.uso-periodo { display: grid; gap: 6px; margin: 12px 0; padding: 12px; border: 1px solid var(--border, #dfe7e2); border-radius: 12px; background: #fff; }
+.uso-periodo select { max-width: 240px; }

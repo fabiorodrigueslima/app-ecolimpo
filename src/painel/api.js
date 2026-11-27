@@ -150,6 +150,11 @@ export function criarApiPainel(obterToken) {
       return pedir("POST", "rpc/contar_inscricoes", { corpo: {} });
     },
 
+    // Contadores de uso desde a data (inclusive), no formato "2026-11-01".
+    listarContagens(desde) {
+      return pedir("GET", `contagens?select=tipo,local,total&dia=gte.${encodeURIComponent(desde)}&limit=10000`);
+    },
+
     ultimoEnvioLembrete() {
       return pedir("GET", "envios_lembrete?select=*&order=executado_em.desc&limit=1");
     },

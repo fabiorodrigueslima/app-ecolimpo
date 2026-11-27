@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { contatos, linkWhatsapp, mensagemDoMorador } from "../data/contatos.js";
+import { contar } from "../lib/contagem.js";
 import { Cabecalho } from "../components/Comuns.jsx";
 import { IconeConversa, IconeEstrela, IconeSeta, IconeWhatsapp } from "../components/Icones.jsx";
 
@@ -36,6 +37,7 @@ export default function Fale({ condominio }) {
         <a
           className="botao botao-whatsapp botao-largo"
           href={linkWhatsapp(mensagemDoMorador(condominio))}
+          onClick={() => contar("whatsapp", condominio)}
           target="_blank"
           rel="noreferrer"
         >

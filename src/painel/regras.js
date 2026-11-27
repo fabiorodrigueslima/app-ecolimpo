@@ -357,3 +357,35 @@ export function destinoDoMfa(etapaMfa, paraNovaSenha) {
 export function codigoValido(codigo) {
   return /^\d{6}$/.test(String(codigo).trim());
 }
+
+// ---------- Contadores de uso ----------
+
+// Data de início do período ("últimos N dias", contando hoje), no fuso de Brasília.
+export function inicioDoPeriodo(dias, agora = new Date()) {
+  const hoje = new Date(`${new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(agora)}T12:00:00Z`);
+  hoje.setUTCDate(hoje.getUTCDate() - (Number(dias) - 1));
+  return hoje.toISOString().slice(0, 10);
+}
+
+// Linhas do banco [{ tipo, local, total }] -> { "<local>": { abertura: 3, whatsapp: 1, ... } }
+export function somarContagens(linhas) {
+  const porLocal = {};
+  for (const { tipo, local, total } of linhas ?? []) {
+    const chave = local ?? "";
+    porLocal[chave] ??= {};
+    porLocal[chave][tipo] = (porLocal[chave][tipo] ?? 0) + Number(total ?? 0);
+  }
+  return porLocal;
+}
+
+// Texto curto para o cartão do condomínio no painel.
+export function resumoDoUso(numeros = {}) {
+  const n = (t) => numeros[t] ?? 0;
+  const plural = (q, um, varios) => `${q} ${q === 1 ? um : varios}`;
+  return [
+    plural(n("abertura"), "abertura", "aberturas"),
+    plural(n("instalacao"), "instalação", "instalações"),
+    `${n("qr")} pelo QR Code`,
+    `${n("whatsapp")} no WhatsApp`,
+  ].join(" · ");
+}

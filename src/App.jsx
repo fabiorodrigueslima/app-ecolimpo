@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
+import { contarAbertura, ouvirInstalacao } from "./lib/contagem.js";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { atualizarCondominioDoLembrete } from "./lib/lembrete.js";
 import { CondominioContexto, useCondominioMorador } from "./lib/condominios.js";
@@ -32,6 +33,21 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  // Contadores de uso (só números, sem dados pessoais): 1 abertura por visita,
+  // a instalação e a entrada pelo QR Code. Painel e cartaz não contam.
+  const ehDaEquipe = pathname === "/painel" || pathname.startsWith("/painel/") || pathname === "/cartaz";
+  const jaContou = useRef(false);
+  const localAtual = useRef(null);
+  useEffect(() => {
+    localAtual.current = condominio;
+  }, [condominio]);
+  useEffect(() => {
+    if (jaContou.current || carregando || ehDaEquipe) return;
+    jaContou.current = true;
+    contarAbertura({ local: condominio, veioDoQr: new URLSearchParams(search).get("c") ?? "" });
+  }, [carregando, ehDaEquipe, condominio, search]);
+  useEffect(() => ouvirInstalacao(() => localAtual.current), []);
 
   if (pathname === "/painel" || pathname.startsWith("/painel/")) {
     return (

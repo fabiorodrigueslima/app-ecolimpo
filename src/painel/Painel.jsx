@@ -5,6 +5,7 @@ import { lerRetornoDoEmail, lerAal, etapaDoMfa, destinoDoMfa } from "./regras.js
 import { lerEmail, lerFatores, sair } from "./api.js";
 import { apiPainel as api, definirSessao, obterToken, quandoExpirar, sessaoAtual } from "./sessao.js";
 import DuasEtapas from "./DuasEtapas.jsx";
+import { marcarAparelhoDaEquipe } from "../lib/contagem.js";
 import Login from "./Login.jsx";
 import NovaSenha from "./NovaSenha.jsx";
 import Respostas from "./Respostas.jsx";
@@ -65,6 +66,7 @@ export default function Painel() {
     api.ehEquipe().then((sim) => {
       if (!ativo || !sessaoAtual()) return; // sessão terminou: já voltou para o login
       const proxima = sim === true ? "dentro" : sim === false ? "sem-acesso" : "sem-conexao";
+      if (sim === true) marcarAparelhoDaEquipe(); // celular da equipe não entra nos contadores
       setEstado((e) => ({ ...e, etapa: proxima }));
     });
     return () => {

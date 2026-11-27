@@ -24,6 +24,10 @@ export default function Privacidade() {
         <li>
           <strong>O mês em que você respondeu a pesquisa</strong>, para cada celular responder uma vez por mês.
         </li>
+        <li>
+          <strong>Marcas da contagem de uso</strong> (“já contou esta visita” e “já contou a instalação”), para não contar
+          a mesma coisa duas vezes.
+        </li>
       </ul>
       <p>Essas informações não são enviadas para a cooperativa. Para apagar, limpe os dados do navegador ou do app.</p>
 
@@ -44,6 +48,12 @@ export default function Privacidade() {
           <strong>Lembrete da coleta (quando você ativar):</strong> um código técnico criado pelo seu navegador para
           receber o aviso e o condomínio escolhido. Não guardamos seu número de telefone.
         </li>
+        <li>
+          <strong>Contagem de uso (sem identificar ninguém):</strong> quando o app é aberto, instalado na tela inicial,
+          aberto pelo QR Code ou quando alguém toca no botão de WhatsApp, o app soma +1 num contador do dia, junto com o
+          condomínio escolhido. Não enviamos nome, telefone, localização nem código do celular: só dá para saber{" "}
+          <strong>quantas vezes</strong>, nunca <strong>quem</strong>.
+        </li>
       </ul>
       <p>
         Nunca pedimos CPF, telefone, e-mail ou endereço completo. Por favor, não escreva esses dados nos textos.
@@ -54,6 +64,7 @@ export default function Privacidade() {
         <li>Melhorar a coleta seletiva e a orientação aos moradores.</li>
         <li>Entender dúvidas e reclamações sobre a coleta no condomínio.</li>
         <li>Enviar o lembrete no dia da coleta e avisos da cooperativa (como ações de mobilização no condomínio), só para quem pediu.</li>
+        <li>Saber quanto o app é usado em cada condomínio, pela contagem de uso (só números).</li>
       </ul>
       <p>Não vendemos nem compartilhamos seus dados com empresas de propaganda.</p>
 
@@ -84,6 +95,7 @@ export default function Privacidade() {
           automaticamente.
         </li>
         <li>Inscrição do lembrete: até você desligar o lembrete ou desinstalar o app.</li>
+        <li>Contagem de uso (só números por dia): 2 anos. Depois disso, é apagada automaticamente.</li>
       </ul>
 
       <h2>Quem pode ver</h2>

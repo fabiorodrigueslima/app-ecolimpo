@@ -4,6 +4,7 @@ import { IconeConversa, IconeWhatsapp } from "../components/Icones.jsx";
 import { VoceSabia, Depoimento } from "../components/VoceSabia.jsx";
 import GuiaSeparacao from "../components/GuiaSeparacao.jsx";
 import { linkWhatsapp, mensagemDoMorador } from "../data/contatos.js";
+import { contar } from "../lib/contagem.js";
 
 export default function Recicla({ condominio }) {
   return (
@@ -32,6 +33,7 @@ export default function Recicla({ condominio }) {
           Prefere uma resposta direta?{" "}
           <a
             href={linkWhatsapp(mensagemDoMorador(condominio, "Tenho uma dúvida sobre a separação dos recicláveis."))}
+            onClick={() => contar("whatsapp", condominio)}
             target="_blank"
             rel="noreferrer"
           >

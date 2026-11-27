@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { NOMES_DIAS, HORARIOS_VALIDOS, descreverDias, formatarHorario, periodoDoHorario } from "../lib/coleta.js";
-import { gerarId, validarCondominio, situacaoLembrete, mensagemWhatsApp, linkWhatsApp } from "./regras.js";
+import {
+  gerarId,
+  validarCondominio,
+  situacaoLembrete,
+  mensagemWhatsApp,
+  linkWhatsApp,
+  inicioDoPeriodo,
+  somarContagens,
+  resumoDoUso,
+} from "./regras.js";
 
 // Caixa com o texto pronto para o síndico mandar no WhatsApp dos moradores.
 function MensagemWhatsApp({ condominio, aoFechar }) {
@@ -171,6 +180,8 @@ export default function Condominios({ api }) {
   const [aviso, setAviso] = useState("");
   const [mensagemDe, setMensagemDe] = useState(null); // id do condomínio com a mensagem aberta
   const [versao, setVersao] = useState(0); // muda para recarregar
+  const [periodo, setPeriodo] = useState(30); // dias dos contadores de uso
+  const [uso, setUso] = useState(null); // null = ainda sem contadores (SQL 017 não rodado ou erro)
 
   useEffect(() => {
     let ativo = true;
@@ -188,6 +199,16 @@ export default function Condominios({ api }) {
       ativo = false;
     };
   }, [api, versao]);
+
+  useEffect(() => {
+    let ativo = true;
+    api.listarContagens(inicioDoPeriodo(periodo)).then((r) => {
+      if (ativo) setUso(r.ok ? somarContagens(r.dados) : null);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [api, versao, periodo]);
 
   async function salvar(dados) {
     const r =
@@ -250,6 +271,26 @@ export default function Condominios({ api }) {
         </div>
       )}
 
+      <div className="uso-periodo">
+        <label className="campo campo-simples">
+          <span>Contadores de uso do app</span>
+          <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}>
+            <option value={1}>Hoje</option>
+            <option value={7}>Últimos 7 dias</option>
+            <option value={30}>Últimos 30 dias</option>
+            <option value={90}>Últimos 90 dias</option>
+          </select>
+        </label>
+        {uso ? (
+          <p className="dica">
+            Só números, sem saber quem foi. Abriu sem escolher condomínio: {uso[""]?.abertura ?? 0} · WhatsApp sem
+            condomínio: {uso[""]?.whatsapp ?? 0}. Celulares que entraram no painel não são contados.
+          </p>
+        ) : (
+          <p className="dica">Contadores ainda não ligados (falta rodar o SQL 017 no Supabase).</p>
+        )}
+      </div>
+
       {aviso && (
         <p className="aviso-ok" role="status">
           {aviso}
@@ -281,6 +322,11 @@ export default function Condominios({ api }) {
               </p>
               {c.dias_poda?.length > 0 && <p>Podas: {descreverDias(c.dias_poda)}</p>}
               <p className="dica">Lembrete ligado: {inscritos[c.id] ?? 0} morador(es)</p>
+              {uso && (
+                <p className="dica">
+                  Uso ({periodo === 1 ? "hoje" : `últimos ${periodo} dias`}): {resumoDoUso(uso[c.id])}
+                </p>
+              )}
             </div>
             <div className="botoes">
               {c.ativo && (
