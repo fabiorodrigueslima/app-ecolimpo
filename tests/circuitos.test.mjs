@@ -44,6 +44,12 @@ test("bairros divididos: o morador escolhe a parte; fora dela = 'não está na l
   // O bairro dividido sozinho não é uma escolha final (precisa da quadra/rua).
   assert.equal(escolhaPorId("residencial-oeste"), null);
   assert.equal(escolhaPorId("nao-existe"), null);
+  // Ruas 12, 13, 14, 15A e 16 são do Setor Tradicional (inteiro, sem escolher rua), não do Residencial Oeste.
+  assert.equal(escolhaPorId("tradicional").nome, "Setor Tradicional");
+  assert.equal(AREAS.find((a) => a.id === "tradicional").partes, undefined);
+  assert.equal(escolhaPorId("residencial-oeste-101-104").nome, "Quadras 101 até 104");
+  assert.equal(descreverColetas(escolhaPorId("residencial-oeste-101-104")), "Segunda e quarta, à tarde (13h às 18h)");
+  assert.equal(descreverColetas(escolhaPorId("residencial-oeste-201-206")), "Terça e quinta, à tarde (13h às 18h)");
 });
 
 test("grupos da lista: Jardins Mangueiral/Jardim Botânico e São Sebastião", () => {

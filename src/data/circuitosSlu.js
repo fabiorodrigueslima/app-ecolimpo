@@ -87,8 +87,7 @@ export const AREAS = [
     grupo: "São Sebastião",
     pergunta: "Em qual quadra você mora?",
     partes: [
-      // Texto igual ao do SLU (falta confirmar se as ruas ficam dentro das quadras 101 a 104).
-      { id: "residencial-oeste-101-104", nome: "Quadras 101 até 104 (ruas 12, 13, 14, 15A e 16)", circuitos: ["403206"] },
+      { id: "residencial-oeste-101-104", nome: "Quadras 101 até 104", circuitos: ["403206"] },
       { id: "residencial-oeste-201-206", nome: "Quadras 201 até 206", circuitos: ["403205"] },
       { id: "residencial-oeste-301-307", nome: "Quadras 301 até 307", circuitos: ["403205"] },
     ],
@@ -101,6 +100,7 @@ export const AREAS = [
     pergunta: "Em qual quadra você mora?",
     partes: [{ id: "sao-bartolomeu-quadras-1-2", nome: "Quadras 1 e 2", circuitos: ["403206"] }],
   },
-  { id: "tradicional", nome: "Bairro Tradicional", grupo: "São Sebastião", circuitos: ["403206"] },
+  // Setor Tradicional inteiro (inclui as ruas 12, 13, 14, 15A e 16 citadas no panfleto do SLU).
+  { id: "tradicional", nome: "Setor Tradicional", grupo: "São Sebastião", circuitos: ["403206"] },
   { id: "morro-azul", nome: "Morro Azul", grupo: "São Sebastião", circuitos: ["403206"] },
 ];
